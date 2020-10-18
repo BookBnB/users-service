@@ -20,4 +20,4 @@ RUN pip install -r requirements.txt && \
 
 EXPOSE $PORT
 
-ENTRYPOINT /app/entrypoint.sh
+ENTRYPOINT /app/run.sh

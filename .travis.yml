@@ -9,3 +9,11 @@ services:
 
 script:
   - python -m pytest tests
+
+deploy:
+    provider: script
+    script: bash docker/heroku_push.sh
+    cleanup: true
+    on:
+        all_branches: true
+        condition: $TRAVIS_BRANCH = master || $TRAVIS_BRANCH = develop

@@ -9,6 +9,10 @@ bp = Blueprint('v1', __name__, url_prefix='/v1')
 def hello_world():
 	return jsonify(hello="world")
 
+@bp.route("/test")
+def test_endpoint():
+	return jsonify(result="ok!")
+
 @bp.route("/users/<email>", methods=["POST"])
 def user_create(email):
 	u = User(email)

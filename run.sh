@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
-flask db upgrade
-waitress-serve --port $PORT --call 'project:create_app'
+dotenv run flask db upgrade
+dotenv run bash -c 'waitress-serve --port $PORT --call "project:create_app"'

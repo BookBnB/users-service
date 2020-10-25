@@ -1,7 +1,9 @@
-from flask import jsonify
-from flask import Blueprint
+from flask import Flask, jsonify, Blueprint, request, make_response
 from project.db import db
 from project.models.user import User
+from werkzeug.security import generate_password_hash, check_password_hash
+import jwt
+import datetime
 
 bp = Blueprint('v1', __name__, url_prefix='/v1')
 
@@ -14,8 +16,9 @@ def test_endpoint():
 	return jsonify(result="ok!")
 
 @bp.route("/users/<email>", methods=["POST"])
-def user_create(email):
-	u = User(email)
+def user_create(email, name, password):
+	hashed_password = generate_password_hash(password, method='sha256')
+	u = User(email, name, hashed_password)
 	db.session.add(u)
 	db.session.commit()
 	return jsonify(message="ok")
@@ -24,3 +27,21 @@ def user_create(email):
 def users():
 	users = User.query.all()
 	return jsonify([u.serialize() for u in users])
+
+@bp.route("/login")
+def login():
+	auth = request.authorization
+
+	if not auth or not auth.username or not auth.password:
+		return make_response('User not recognized', 401)
+
+	user = User.query.filter_by(name=auth.username).first()
+
+	if not user:
+		return make_response('User not recognized', 401)
+
+	if check_password_hash(user.password, auth.password):
+		token = jwt.encode({'id': user.id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, bp.config['SECRET_KEY'])
+		return jsonify({'token': token.decode('UTF-8')})
+
+	return make_response('User not recognized', 401)

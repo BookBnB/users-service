@@ -15,13 +15,14 @@ def hello_world():
 def test_endpoint():
 	return jsonify(result="ok!")
 
-@bp.route("/users/<email>", methods=["POST"])
+#TODO: esto no deberia venir por path variable
+@bp.route("/users/<email>/<name>/<password>", methods=["POST"])
 def user_create(email, name, password):
 	hashed_password = generate_password_hash(password, method='sha256')
 	u = User(email, name, hashed_password)
 	db.session.add(u)
 	db.session.commit()
-	return jsonify(message="ok")
+	return jsonify(u.serialize())
 
 @bp.route("/users")
 def users():

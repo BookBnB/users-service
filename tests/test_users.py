@@ -97,3 +97,43 @@ def test_login(client):
 
 	assert data['id'] == 'test@test.com'
 	assert res.status_code == 200
+
+def test_login_wrong_password(client):
+	user = build_user()
+	create_user(client, user)
+
+	credentials = '{}:{}'.format(user['email'], 'wrongPassword')
+	encoded_credentials = b64encode(credentials.encode()).decode()
+
+	auth_header = ('Authorization', 'Basic {}'.format(encoded_credentials))
+
+	res = client.get(path='/v1/login', headers=[auth_header])
+	res_json = res.get_json()
+
+	assert res.status_code == 401
+	assert res_json['error'] == 'User not recognized'
+
+def test_login_wrong_user(client):
+	user = build_user()
+	create_user(client, user)
+
+	credentials = '{}:{}'.format('anotheruser@test.com', user['password'])
+	encoded_credentials = b64encode(credentials.encode()).decode()
+
+	auth_header = ('Authorization', 'Basic {}'.format(encoded_credentials))
+
+	res = client.get(path='/v1/login', headers=[auth_header])
+	res_json = res.get_json()
+
+	assert res.status_code == 401
+	assert res_json['error'] == 'User not recognized'
+
+def test_login_missing_header(client):
+	user = build_user()
+	create_user(client, user)
+
+	res = client.get(path='/v1/login')
+	res_json = res.get_json()
+
+	assert res.status_code == 401
+	assert res_json['error'] == 'User not recognized'

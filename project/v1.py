@@ -32,12 +32,12 @@ def login():
 	auth = request.authorization
 
 	if not auth or not auth.username or not auth.password:
-		return make_response('User not recognized', 401)
+		return make_response({ 'error': 'User not recognized' }, 401)
 
 	user = UserService().find_by_email(auth.username)
 
 	if not user:
-		return make_response('User not recognized', 401)
+		return make_response({ 'error': 'User not recognized' }, 401)
 
 	if check_password_hash(user.password, auth.password):
 		token = jwt.encode({
@@ -48,4 +48,4 @@ def login():
 		)
 		return jsonify({'token': token.decode('UTF-8')})
 
-	return make_response('User not recognized', 401)
+	return make_response({ 'error': 'User not recognized' }, 401)

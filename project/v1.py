@@ -7,29 +7,25 @@ import datetime
 
 bp = Blueprint('v1', __name__, url_prefix='/v1')
 
-@bp.route("/")
-def hello_world():
-	return jsonify(hello="world")
+@bp.route('/users', methods=['POST'])
+def users_create():
+	body = request.get_json()
 
-@bp.route("/test")
-def test_endpoint():
-	return jsonify(result="ok!")
+	hashed_password = generate_password_hash(body['password'], method='sha256')
 
-#TODO: esto no deberia venir por path variable
-@bp.route("/users/<email>/<name>/<password>", methods=["POST"])
-def user_create(email, name, password):
-	hashed_password = generate_password_hash(password, method='sha256')
-	u = User(email, name, hashed_password)
+	u = User(body['email'], body['name'], hashed_password)
+
 	db.session.add(u)
 	db.session.commit()
+
 	return jsonify(u.serialize())
 
-@bp.route("/users")
-def users():
+@bp.route('/users', methods=['GET'])
+def users_list():
 	users = User.query.all()
 	return jsonify([u.serialize() for u in users])
 
-@bp.route("/login")
+@bp.route('/login')
 def login():
 	auth = request.authorization
 

@@ -14,7 +14,8 @@ def app():
 
     # create the app with common test config
     app = create_app({
-        "SQLALCHEMY_DATABASE_URI": "sqlite:///%s" % db_path
+		"SQLALCHEMY_DATABASE_URI": "sqlite:///%s" % db_path,
+		"SECRET_KEY": "test_key"
     })
 
     with app.app_context():

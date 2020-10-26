@@ -6,7 +6,6 @@ from project.v1 import bp as bp_v1
 def create_app(test_config = {}):
 	app = Flask(__name__)
 	app.config.from_object("project.config.Config")
-	app.config['SECRET_KEY'] = ''
 
 	if test_config is not None:
 		app.config.update(test_config)

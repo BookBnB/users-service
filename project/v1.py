@@ -13,6 +13,18 @@ bp = Blueprint('v1', __name__, url_prefix='/v1')
 def users_create():
 	body = request.get_json()
 
+	if not body.get('name', ''):
+		return make_response({ 'error': 'Missing user name' }, 400)
+
+	if not body.get('email', ''):
+		return make_response({ 'error': 'Missing user email' }, 400)
+
+	if not body.get('password', ''):
+		return make_response({ 'error': 'Missing user password' }, 400)
+
+	if len(body['password']) < 8:
+		return make_response({ 'error': 'Invalid user password: expected length of 8 characters' }, 400)
+
 	hashed_password = generate_password_hash(body['password'], method='sha256')
 
 	u = User(body['email'], body['name'], hashed_password)

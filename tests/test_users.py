@@ -22,6 +22,54 @@ def test_create_user(client):
 	assert res['email'] == 'test@test.com'
 	assert res['name'] == 'testUser'
 
+def test_create_user_missing_name(client):
+	status, res = create_user(client, { 'email': 'test@test.com', 'password': 'testPass' })
+
+	assert status == 400
+	assert res['error'] == 'Missing user name'
+
+def test_create_user_invalid_name(client):
+	status, res = create_user(client, { 'name': '', 'email': 'test@test.com', 'password': 'testPass' })
+
+	assert status == 400
+	assert res['error'] == 'Missing user name'
+
+def test_create_user_missing_email(client):
+	status, res = create_user(client, { 'name': 'testName', 'password': 'testPass' })
+
+	assert status == 400
+	assert res['error'] == 'Missing user email'
+
+def test_create_user_invalid_name(client):
+	status, res = create_user(client, { 'name': '', 'email': 'test@test.com', 'password': 'testPass' })
+
+	assert status == 400
+	assert res['error'] == 'Missing user name'
+
+def test_create_user_empty_email(client):
+	status, res = create_user(client, { 'email': '', 'name': 'testName', 'password': 'testPass' })
+
+	assert status == 400
+	assert res['error'] == 'Missing user email'
+
+def test_create_user_missing_password(client):
+	status, res = create_user(client, { 'name': 'testName', 'email': 'test@test.com' })
+
+	assert status == 400
+	assert res['error'] == 'Missing user password'
+
+def test_create_user_empty_password(client):
+	status, res = create_user(client, { 'name': 'testName', 'email': 'test@test.com', 'password': '' })
+
+	assert status == 400
+	assert res['error'] == 'Missing user password'
+
+def test_create_user_invalid_password(client):
+	status, res = create_user(client, { 'name': 'testName', 'email': 'test@test.com', 'password': 'short' })
+
+	assert status == 400
+	assert res['error'] == 'Invalid user password: expected length of 8 characters'
+
 def test_create_and_list_users(client):
 	create_user(client, build_user(1))
 	create_user(client, build_user(2))

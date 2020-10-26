@@ -1,11 +1,12 @@
 import datetime
 
 import jwt
-from flask import Blueprint, Flask, jsonify, make_response, request, current_app
+from flask import (Blueprint, Flask, current_app, jsonify, make_response,
+                   request)
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from project.db import db
-from project.models.user import User
+from project.services.users_service import UserService
 
 bp = Blueprint('v1', __name__, url_prefix='/v1')
 
@@ -13,30 +14,17 @@ bp = Blueprint('v1', __name__, url_prefix='/v1')
 def users_create():
 	body = request.get_json()
 
-	if not body.get('name', ''):
-		return make_response({ 'error': 'Missing user name' }, 400)
+	try:
+		service = UserService()
+		user = service.create_user(body)
 
-	if not body.get('email', ''):
-		return make_response({ 'error': 'Missing user email' }, 400)
-
-	if not body.get('password', ''):
-		return make_response({ 'error': 'Missing user password' }, 400)
-
-	if len(body['password']) < 8:
-		return make_response({ 'error': 'Invalid user password: expected length of 8 characters' }, 400)
-
-	hashed_password = generate_password_hash(body['password'], method='sha256')
-
-	u = User(body['email'], body['name'], hashed_password)
-
-	db.session.add(u)
-	db.session.commit()
-
-	return jsonify(u.serialize())
+		return jsonify(user.serialize())
+	except ValueError as ex:
+		return make_response({ 'error': str(ex) }, 400)
 
 @bp.route('/users', methods=['GET'])
 def users_list():
-	users = User.query.all()
+	users = UserService().get_all()
 	return jsonify([u.serialize() for u in users])
 
 @bp.route('/login')
@@ -46,7 +34,7 @@ def login():
 	if not auth or not auth.username or not auth.password:
 		return make_response('User not recognized', 401)
 
-	user = User.query.filter_by(email=auth.username).first()
+	user = UserService().find_by_email(auth.username)
 
 	if not user:
 		return make_response('User not recognized', 401)

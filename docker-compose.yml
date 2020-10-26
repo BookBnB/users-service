@@ -2,15 +2,16 @@ version: '3.7'
 
 services:
   project:
-    build: .
+    image: python:3.8.6-slim-buster
     volumes:
       - .:/app
     ports:
       - 5000:5000
-    env_file:
-      - ./.env
+    env_file: .env
     depends_on:
       - db
+    working_dir: /app
+    command: ./run_dev.sh
 
   db:
     container_name: db

@@ -30,26 +30,27 @@ def users_list():
 
 @bp.route('/login')
 def login():
-	auth = request.authorization
+    auth = request.authorization
 
-	if not auth or not auth.username or not auth.password:
-		return make_response({ 'error': 'User not recognized' }, 401)
+    if not auth or not auth.username or not auth.password:
+        return make_response({ 'error': 'User not recognized' }, 401)
 
-	user = UserService().find_by_email(auth.username)
+    user = UserService().find_by_email(auth.username)
 
-	if not user:
-		return make_response({ 'error': 'User not recognized' }, 401)
+    if not user:
+        return make_response({ 'error': 'User not recognized' }, 401)
 
-	if check_password_hash(user.password, auth.password):
-		token = jwt.encode({
-				'id': user.email,
-				'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
-			},
-			current_app.config['SECRET_KEY']
-		)
-		return jsonify({'token': token.decode('UTF-8')})
+    if check_password_hash(user.password, auth.password):
+        token = jwt.encode({
+                'id': user.email,
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30),
+                'role': user.role
+            },
+            current_app.config['SECRET_KEY']
+        )
+        return jsonify({'token': token.decode('UTF-8')})
 
-	return make_response({ 'error': 'User not recognized' }, 401)
+    return make_response({ 'error': 'User not recognized' }, 401)
 
 @bp.route('/roles')
 def get_roles():

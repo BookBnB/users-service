@@ -119,7 +119,7 @@ def test_create_and_list_users(client):
 	assert len(users_array) == 2
 
 def test_login(client):
-	user = build_user()
+	user = build_user(role='guest')
 	create_user(client, user)
 
 	credentials = '{}:{}'.format(user['email'], user['password'])
@@ -133,8 +133,10 @@ def test_login(client):
 	decoded_data = b64decode(base64_data.encode()).decode()
 	data = json.loads(decoded_data)
 
-	assert data['id'] == 'test@test.com'
 	assert res.status_code == 200
+	assert data['id'] == 'test@test.com'
+	assert data['role'] == 'guest'
+	assert data['exp']
 
 def test_login_wrong_password(client):
 	user = build_user()

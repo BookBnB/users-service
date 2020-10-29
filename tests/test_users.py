@@ -1,26 +1,56 @@
 import json
 from base64 import b64encode, b64decode
 
-def build_user(n=0):
+def build_user(n=0, role='host'):
 	nstr = (str(n) if n > 0 else '')
 	return {
 		'name': 'test%sUser' % nstr,
 		'password': 'test%sPass' % nstr,
-		'email': 'test%s@test.com' % nstr
+		'email': 'test%s@test.com' % nstr,
+		'role': role
 	}
 
 def create_user(client, data_dict):
 	res = client.post(path='/v1/users', data=json.dumps(data_dict), content_type='application/json')
 	return res.status_code, json.loads(res.data.decode())
 
-def test_create_user(client):
-	user = build_user()
+def test_create_user_host_role(client):
+	user = build_user(role='host')
 
 	status, res = create_user(client, user)
 
 	assert status == 200
 	assert res['email'] == 'test@test.com'
 	assert res['name'] == 'testUser'
+	assert res['role'] == 'host'
+
+def test_create_user_guest_role(client):
+	user = build_user(role='guest')
+
+	status, res = create_user(client, user)
+
+	assert status == 200
+	assert res['email'] == 'test@test.com'
+	assert res['name'] == 'testUser'
+	assert res['role'] == 'guest'
+
+def test_create_user_admin_role(client):
+	user = build_user(role='admin')
+
+	status, res = create_user(client, user)
+
+	assert status == 200
+	assert res['email'] == 'test@test.com'
+	assert res['name'] == 'testUser'
+	assert res['role'] == 'admin'
+
+def test_create_user_invalid_role(client):
+	user = build_user(role='invalidrole')
+
+	status, res = create_user(client, user)
+
+	assert status == 400
+	assert res['error'] == 'Invalid user role'
 
 def test_create_user_missing_name(client):
 	status, res = create_user(client, { 'email': 'test@test.com', 'password': 'testPass' })
@@ -69,6 +99,14 @@ def test_create_user_invalid_password(client):
 
 	assert status == 400
 	assert res['error'] == 'Invalid user password: expected length of 8 characters'
+
+def test_get_roles(client):
+    res = client.get(path='/v1/roles')
+
+    res_json = res.get_json()
+
+    assert res.status_code == 200
+    assert res_json['roles'] == ['admin', 'guest', 'host']
 
 def test_create_and_list_users(client):
 	create_user(client, build_user(1))

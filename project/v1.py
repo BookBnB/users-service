@@ -7,6 +7,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from project.db import db
 from project.services.users_service import UserService
+from project.models.role import ROLES
 
 bp = Blueprint('v1', __name__, url_prefix='/v1')
 
@@ -49,3 +50,7 @@ def login():
 		return jsonify({'token': token.decode('UTF-8')})
 
 	return make_response({ 'error': 'User not recognized' }, 401)
+
+@bp.route('/roles')
+def get_roles():
+    return jsonify({ 'roles': ROLES })

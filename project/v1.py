@@ -28,19 +28,22 @@ def users_list():
 	users = UserService().get_all()
 	return jsonify([u.serialize() for u in users])
 
-@bp.route('/login')
-def login():
-    auth = request.authorization
+@bp.route('/session', methods=['POST'])
+def create_session():
+    data = request.get_json()
 
-    if not auth or not auth.username or not auth.password:
+    email = data.get('email', '')
+    password = data.get('password', '')
+
+    if not email or not password:
         return make_response({ 'error': 'User not recognized' }, 401)
 
-    user = UserService().find_by_email(auth.username)
+    user = UserService().find_by_email(email)
 
     if not user:
         return make_response({ 'error': 'User not recognized' }, 401)
 
-    if check_password_hash(user.password, auth.password):
+    if check_password_hash(user.password, password):
         token = jwt.encode({
                 'id': user.email,
                 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30),

@@ -122,12 +122,10 @@ def test_login(client):
 	user = build_user(role='guest')
 	create_user(client, user)
 
-	credentials = '{}:{}'.format(user['email'], user['password'])
-	encoded_credentials = b64encode(credentials.encode()).decode()
-
-	auth_header = ('Authorization', 'Basic {}'.format(encoded_credentials))
-
-	res = client.get(path='/v1/login', headers=[auth_header])
+	res = client.post(path='/v1/session', data=json.dumps({
+        'email': user['email'],
+        'password': user['password']
+    }), content_type='application/json')
 
 	base64_data = res.get_json()['token'].split('.')[1]
 	decoded_data = b64decode(base64_data.encode()).decode()
@@ -142,12 +140,11 @@ def test_login_wrong_password(client):
 	user = build_user()
 	create_user(client, user)
 
-	credentials = '{}:{}'.format(user['email'], 'wrongPassword')
-	encoded_credentials = b64encode(credentials.encode()).decode()
+	res = client.post(path='/v1/session', data=json.dumps({
+        'email': user['email'],
+        'password': 'wrongpassword'
+    }), content_type='application/json')
 
-	auth_header = ('Authorization', 'Basic {}'.format(encoded_credentials))
-
-	res = client.get(path='/v1/login', headers=[auth_header])
 	res_json = res.get_json()
 
 	assert res.status_code == 401
@@ -157,22 +154,22 @@ def test_login_wrong_user(client):
 	user = build_user()
 	create_user(client, user)
 
-	credentials = '{}:{}'.format('anotheruser@test.com', user['password'])
-	encoded_credentials = b64encode(credentials.encode()).decode()
+	res = client.post(path='/v1/session', data=json.dumps({
+        'email': 'wronguser@test.com',
+        'password': user['password']
+    }), content_type='application/json')
 
-	auth_header = ('Authorization', 'Basic {}'.format(encoded_credentials))
-
-	res = client.get(path='/v1/login', headers=[auth_header])
 	res_json = res.get_json()
 
 	assert res.status_code == 401
 	assert res_json['error'] == 'User not recognized'
 
-def test_login_missing_header(client):
+def test_login_empty_header(client):
 	user = build_user()
 	create_user(client, user)
 
-	res = client.get(path='/v1/login')
+	res = client.post(path='/v1/session', data=json.dumps({}), content_type='application/json')
+
 	res_json = res.get_json()
 
 	assert res.status_code == 401

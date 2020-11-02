@@ -122,7 +122,7 @@ def test_login(client):
 	user = build_user(role='guest')
 	create_user(client, user)
 
-	res = client.post(path='/v1/session', data=json.dumps({
+	res = client.post(path='/v1/sessions', data=json.dumps({
         'email': user['email'],
         'password': user['password']
     }), content_type='application/json')
@@ -140,7 +140,7 @@ def test_login_wrong_password(client):
 	user = build_user()
 	create_user(client, user)
 
-	res = client.post(path='/v1/session', data=json.dumps({
+	res = client.post(path='/v1/sessions', data=json.dumps({
         'email': user['email'],
         'password': 'wrongpassword'
     }), content_type='application/json')
@@ -154,7 +154,7 @@ def test_login_wrong_user(client):
 	user = build_user()
 	create_user(client, user)
 
-	res = client.post(path='/v1/session', data=json.dumps({
+	res = client.post(path='/v1/sessions', data=json.dumps({
         'email': 'wronguser@test.com',
         'password': user['password']
     }), content_type='application/json')
@@ -168,7 +168,7 @@ def test_login_empty_header(client):
 	user = build_user()
 	create_user(client, user)
 
-	res = client.post(path='/v1/session', data=json.dumps({}), content_type='application/json')
+	res = client.post(path='/v1/sessions', data=json.dumps({}), content_type='application/json')
 
 	res_json = res.get_json()
 

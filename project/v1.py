@@ -28,7 +28,7 @@ def users_list():
 	users = UserService().get_all()
 	return jsonify([u.serialize() for u in users])
 
-@bp.route('/session', methods=['POST'])
+@bp.route('/sessions', methods=['POST'])
 def create_session():
     data = request.get_json()
 

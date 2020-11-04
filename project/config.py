@@ -9,3 +9,6 @@ class Config(object):
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 	SECRET_KEY = os.getenv('SECRET_KEY')
+
+    # expresado en segundos, default 24hs
+	SESSION_TOKEN_DURATION = int(os.getenv('SESSION_TOKEN_DURATION') or "86400")

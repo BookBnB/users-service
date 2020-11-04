@@ -44,9 +44,11 @@ def create_session():
         return make_response({ 'error': 'User not recognized' }, 401)
 
     if check_password_hash(user.password, password):
+        token_duration = datetime.timedelta(seconds=current_app.config['SESSION_TOKEN_DURATION'])
+
         token = jwt.encode({
                 'id': user.email,
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30),
+                'exp': datetime.datetime.utcnow() + token_duration,
                 'role': user.role
             },
             current_app.config['SECRET_KEY']

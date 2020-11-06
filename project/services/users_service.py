@@ -20,6 +20,9 @@ class UserService():
         if values_dict.get('role', '') not in ROLES:
             raise ValueError('Invalid user role')
 
+        if self.find_by_email(values_dict['email']) is not None:
+            raise ValueError('User already exists')
+
         hashed_password = generate_password_hash(values_dict['password'], method='sha256')
 
         user = User(values_dict['email'], values_dict['name'], hashed_password, values_dict['role'])

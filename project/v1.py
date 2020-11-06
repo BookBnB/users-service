@@ -21,7 +21,7 @@ def users_create():
 
 		return jsonify(user.serialize())
 	except ValueError as ex:
-		return make_response({ 'error': str(ex) }, 400)
+		return make_response({ 'message': str(ex) }, 400)
 
 @bp.route('/users', methods=['GET'])
 def users_list():
@@ -36,12 +36,12 @@ def create_session():
     password = data.get('password', '')
 
     if not email or not password:
-        return make_response({ 'error': 'User not recognized' }, 401)
+        return make_response({ 'message': 'User not recognized' }, 401)
 
     user = UserService().find_by_email(email)
 
     if not user:
-        return make_response({ 'error': 'User not recognized' }, 401)
+        return make_response({ 'message': 'User not recognized' }, 401)
 
     if check_password_hash(user.password, password):
         token_duration = datetime.timedelta(seconds=current_app.config['SESSION_TOKEN_DURATION'])
@@ -55,7 +55,7 @@ def create_session():
         )
         return jsonify({'token': token.decode('UTF-8')})
 
-    return make_response({ 'error': 'User not recognized' }, 401)
+    return make_response({ 'message': 'User not recognized' }, 401)
 
 @bp.route('/roles')
 def get_roles():

@@ -44,6 +44,15 @@ def test_create_user_admin_role(client):
 	assert res['name'] == 'testUser'
 	assert res['role'] == 'admin'
 
+def test_create_user_existing_user(client):
+	user = build_user(role='admin')
+
+	status, res = create_user(client, user)
+	status, res = create_user(client, user)
+
+	assert status == 400
+	assert res['error'] == 'User already exists'
+
 def test_create_user_invalid_role(client):
 	user = build_user(role='invalidrole')
 

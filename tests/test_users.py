@@ -4,9 +4,12 @@ from base64 import b64encode, b64decode
 def build_user(n=0, role='host'):
 	nstr = (str(n) if n > 0 else '')
 	return {
-		'name': 'test%sUser' % nstr,
-		'password': 'test%sPass' % nstr,
 		'email': 'test%s@test.com' % nstr,
+		'name': 'name%s' % nstr,
+		'surname': 'surname%s' % nstr,
+		'password': 'test%sPass' % nstr,
+		'phone': '0123456789',
+		'city': 'test city, test state',
 		'role': role
 	}
 
@@ -14,35 +17,35 @@ def create_user(client, data_dict):
 	res = client.post(path='/v1/users', data=json.dumps(data_dict), content_type='application/json')
 	return res.status_code, json.loads(res.data.decode())
 
+def validate_create_user_response(status, res, role):
+	assert status == 200
+	assert res['email'] == 'test@test.com'
+	assert res['name'] == 'name'
+	assert res['surname'] == 'surname'
+	assert res['phone'] == '0123456789'
+	assert res['city'] == 'test city, test state'
+	assert res['role'] == role
+
 def test_create_user_host_role(client):
 	user = build_user(role='host')
 
 	status, res = create_user(client, user)
 
-	assert status == 200
-	assert res['email'] == 'test@test.com'
-	assert res['name'] == 'testUser'
-	assert res['role'] == 'host'
+	validate_create_user_response(status, res, 'host')
 
 def test_create_user_guest_role(client):
 	user = build_user(role='guest')
 
 	status, res = create_user(client, user)
 
-	assert status == 200
-	assert res['email'] == 'test@test.com'
-	assert res['name'] == 'testUser'
-	assert res['role'] == 'guest'
+	validate_create_user_response(status, res, 'guest')
 
 def test_create_user_admin_role(client):
 	user = build_user(role='admin')
 
 	status, res = create_user(client, user)
 
-	assert status == 200
-	assert res['email'] == 'test@test.com'
-	assert res['name'] == 'testUser'
-	assert res['role'] == 'admin'
+	validate_create_user_response(status, res, 'admin')
 
 def test_create_user_existing_user(client):
 	user = build_user(role='admin')
@@ -73,38 +76,87 @@ def test_create_user_invalid_name(client):
 	assert status == 400
 	assert res['message'] == 'Missing user name'
 
+def test_create_user_missing_surname(client):
+	status, res = create_user(client, {
+        'name': 'testName',
+        'email': 'test@test.com',
+        'password': 'testPass'
+    })
+
+	assert status == 400
+	assert res['message'] == 'Missing user surname'
+
+def test_create_user_invalid_surname(client):
+	status, res = create_user(client, {
+        'name': 'testName',
+        'surname': '',
+        'email': 'test@test.com',
+        'password': 'testPass'
+    })
+
+	assert status == 400
+	assert res['message'] == 'Missing user surname'
+
 def test_create_user_missing_email(client):
-	status, res = create_user(client, { 'name': 'testName', 'password': 'testPass' })
+	status, res = create_user(client, {
+        'name': 'testName',
+        'surname': 'testSurname',
+        'password': 'testPass'
+    })
 
 	assert status == 400
 	assert res['message'] == 'Missing user email'
 
 def test_create_user_invalid_name(client):
-	status, res = create_user(client, { 'name': '', 'email': 'test@test.com', 'password': 'testPass' })
+	status, res = create_user(client, {
+        'name': '',
+        'surname': 'testSurname',
+        'email': 'test@test.com',
+        'password': 'testPass'
+    })
 
 	assert status == 400
 	assert res['message'] == 'Missing user name'
 
 def test_create_user_empty_email(client):
-	status, res = create_user(client, { 'email': '', 'name': 'testName', 'password': 'testPass' })
+	status, res = create_user(client, {
+        'email': '',
+        'name': 'testName',
+        'surname': 'testSurname',
+        'password': 'testPass'
+    })
 
 	assert status == 400
 	assert res['message'] == 'Missing user email'
 
 def test_create_user_missing_password(client):
-	status, res = create_user(client, { 'name': 'testName', 'email': 'test@test.com' })
+	status, res = create_user(client, {
+        'name': 'testName',
+        'email': 'test@test.com',
+        'surname': 'testSurname',
+    })
 
 	assert status == 400
 	assert res['message'] == 'Missing user password'
 
 def test_create_user_empty_password(client):
-	status, res = create_user(client, { 'name': 'testName', 'email': 'test@test.com', 'password': '' })
+	status, res = create_user(client, {
+        'name': 'testName',
+        'surname': 'testSurname',
+        'email': 'test@test.com',
+        'password': ''
+    })
 
 	assert status == 400
 	assert res['message'] == 'Missing user password'
 
 def test_create_user_invalid_password(client):
-	status, res = create_user(client, { 'name': 'testName', 'email': 'test@test.com', 'password': 'short' })
+	status, res = create_user(client, {
+        'name': 'testName',
+        'surname': 'testSurname',
+        'email': 'test@test.com',
+        'password': 'short'
+    })
 
 	assert status == 400
 	assert res['message'] == 'Invalid user password: expected length of 8 characters'

@@ -65,13 +65,22 @@ def test_create_user_invalid_role(client):
 	assert res['message'] == 'Invalid user role'
 
 def test_create_user_missing_name(client):
-	status, res = create_user(client, { 'email': 'test@test.com', 'password': 'testPass' })
+	status, res = create_user(client, {
+        'surname': 'testSurname',
+        'email': 'test@test.com',
+        'password': 'testPass'
+    })
 
 	assert status == 400
 	assert res['message'] == 'Missing user name'
 
 def test_create_user_invalid_name(client):
-	status, res = create_user(client, { 'name': '', 'email': 'test@test.com', 'password': 'testPass' })
+	status, res = create_user(client, { 
+        'name': '',
+        'surname': 'testSurname',
+        'email': 'test@test.com',
+        'password': 'testPass'
+    })
 
 	assert status == 400
 	assert res['message'] == 'Missing user name'
@@ -160,6 +169,21 @@ def test_create_user_invalid_password(client):
 
 	assert status == 400
 	assert res['message'] == 'Invalid user password: expected length of 8 characters'
+
+def test_create_user_missing_optional_fields(client):
+	status, res = create_user(client, {
+        'name': 'testName',
+        'surname': 'testSurname',
+        'email': 'test@test.com',
+        'password': 'password',
+        'role': 'guest'
+    })
+
+	assert status == 200
+	assert res['name'] == 'testName'
+	assert res['surname'] == 'testSurname'
+	assert res['email'] == 'test@test.com'
+	assert res['role'] == 'guest'
 
 def test_get_roles(client):
     res = client.get(path='/v1/roles')

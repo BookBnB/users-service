@@ -12,9 +12,12 @@ def app():
 
     db_fd, db_path = tempfile.mkstemp()
 
+    db_url = "sqlite:///%s" % db_path
+
     # create the app with common test config
     app = create_app({
-		"SQLALCHEMY_DATABASE_URI": "sqlite:///%s" % db_path,
+		"DATABASE_URL": db_url,
+		"SQLALCHEMY_DATABASE_URI": db_url,
 		"SECRET_KEY": "test_key"
     })
 

@@ -26,8 +26,8 @@ class UserService():
         hashed_password = generate_password_hash(values_dict['password'], method='sha256')
 
         user = User(values_dict['email'], values_dict['name'], values_dict['surname'],
-                    hashed_password, values_dict['role'], values_dict['phone'],
-                    values_dict['city'])
+                    hashed_password, values_dict['role'], values_dict.get('phone', ''),
+                    values_dict.get('city', ''))
 
         db.session.add(user)
         db.session.commit()

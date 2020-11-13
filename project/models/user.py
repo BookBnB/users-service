@@ -1,9 +1,12 @@
 from project.db import db
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
 
 class User(db.Model):
     __tablename__ = "users"
 
-    email = db.Column(db.String(128), unique=True, primary_key=True)
+    id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, unique=True, primary_key=True)
+    email = db.Column(db.String(128), unique=True, nullable=False)
     name = db.Column(db.String(128), nullable=False)
     surname = db.Column(db.String(128), nullable=False)
     password = db.Column(db.String(128), nullable=False)
@@ -23,6 +26,7 @@ class User(db.Model):
 
     def serialize(self):
         return {
+            "id": self.id,
             "email": self.email,
             "name": self.name,
             "surname": self.surname,

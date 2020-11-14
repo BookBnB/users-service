@@ -47,7 +47,8 @@ def create_session():
         token_duration = datetime.timedelta(seconds=current_app.config['SESSION_TOKEN_DURATION'])
 
         token = jwt.encode({
-                'id': user.email,
+                'id': str(user.id),
+                'email': user.email,
                 'exp': datetime.datetime.utcnow() + token_duration,
                 'role': user.role
             },

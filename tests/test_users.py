@@ -19,6 +19,7 @@ def create_user(client, data_dict):
 
 def validate_create_user_response(status, res, role):
 	assert status == 200
+	assert res['id']
 	assert res['email'] == 'test@test.com'
 	assert res['name'] == 'name'
 	assert res['surname'] == 'surname'
@@ -180,6 +181,7 @@ def test_create_user_missing_optional_fields(client):
     })
 
 	assert status == 200
+	assert res['id']
 	assert res['name'] == 'testName'
 	assert res['surname'] == 'testSurname'
 	assert res['email'] == 'test@test.com'
@@ -213,11 +215,16 @@ def test_login(client):
     }), content_type='application/json')
 
 	base64_data = res.get_json()['token'].split('.')[1]
+
+	if len(base64_data) % 2 != 0:
+		base64_data += '='
+
 	decoded_data = b64decode(base64_data.encode()).decode()
 	data = json.loads(decoded_data)
 
 	assert res.status_code == 200
-	assert data['id'] == 'test@test.com'
+	assert data['id']
+	assert data['email'] == 'test@test.com'
 	assert data['role'] == 'guest'
 	assert data['exp']
 

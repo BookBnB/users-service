@@ -1,34 +1,38 @@
 import datetime
 
 import jwt
+from flasgger import swag_from
 from flask import (Blueprint, Flask, current_app, jsonify, make_response,
                    request)
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from project.db import db
-from project.services.users_service import UserService
 from project.models.role import ROLES
+from project.services.users_service import UserService
 
 bp = Blueprint('v1', __name__, url_prefix='/v1')
 
 @bp.route('/users', methods=['POST'])
+@swag_from('swagger/users/post/users.yml')
 def users_create():
-	body = request.get_json()
+    body = request.get_json()
 
-	try:
-		service = UserService()
-		user = service.create_user(body)
+    try:
+        service = UserService()
+        user = service.create_user(body)
 
-		return jsonify(user.serialize())
-	except ValueError as ex:
-		return make_response({ 'message': str(ex) }, 400)
+        return jsonify(user.serialize())
+    except ValueError as ex:
+        return make_response({ 'message': str(ex) }, 400)
 
 @bp.route('/users', methods=['GET'])
+@swag_from('swagger/users/get/users.yml')
 def users_list():
-	users = UserService().get_all()
-	return jsonify([u.serialize() for u in users])
+    users = UserService().get_all()
+    return jsonify([u.serialize() for u in users])
 
 @bp.route('/sessions', methods=['POST'])
+@swag_from('swagger/users/post/sessions.yml')
 def create_session():
     data = request.get_json()
 
@@ -59,5 +63,6 @@ def create_session():
     return make_response({ 'message': 'User not recognized' }, 401)
 
 @bp.route('/roles')
+@swag_from('swagger/users/get/roles.yml')
 def get_roles():
     return jsonify({ 'roles': ROLES })

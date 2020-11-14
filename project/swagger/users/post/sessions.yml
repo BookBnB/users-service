@@ -1,0 +1,27 @@
+Crear una sesión para un usuario
+---
+parameters:
+  - name: body
+    in: body
+    required: true
+    schema:
+        $ref: '#/definitions/CrearSesionDTO'
+    required: true
+definitions:
+    CrearSesionDTO:
+        type: object
+        properties:
+            email:
+                type: string
+            password:
+                type: string
+    SesionDTO:
+        type: object
+        properties:
+            token:
+                type: string
+responses:
+    200:
+        description: Objeto con token de sesión creada
+        schema:
+            $ref: '#/definitions/SesionDTO'

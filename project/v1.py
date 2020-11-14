@@ -13,23 +13,111 @@ bp = Blueprint('v1', __name__, url_prefix='/v1')
 
 @bp.route('/users', methods=['POST'])
 def users_create():
-	body = request.get_json()
+    """Creación de Usuario
+    ---
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+            $ref: '#/definitions/CrearUsuarioDTO'
+        required: true
+    definitions:
+      CrearUsuarioDTO:
+        type: object
+        properties:
+          email:
+            type: string
+          name:
+            type: string
+          surname:
+            type: string
+          password:
+            type: string
+          role:
+            type: string
+          phone:
+            type: string
+          city:
+            type: string
+      UsuarioDTO:
+        type: object
+        properties:
+          id:
+            type: string
+          email:
+            type: string
+          name:
+            type: string
+          surname:
+            type: string
+          password:
+            type: string
+          role:
+            type: string
+          phone:
+            type: string
+          city:
+            type: string
+    responses:
+      200:
+        description: Datos del usuario creado
+        schema:
+          $ref: '#/definitions/UsuarioDTO'
+    """
+    body = request.get_json()
 
-	try:
-		service = UserService()
-		user = service.create_user(body)
+    try:
+        service = UserService()
+        user = service.create_user(body)
 
-		return jsonify(user.serialize())
-	except ValueError as ex:
-		return make_response({ 'message': str(ex) }, 400)
+        return jsonify(user.serialize())
+    except ValueError as ex:
+        return make_response({ 'message': str(ex) }, 400)
 
 @bp.route('/users', methods=['GET'])
 def users_list():
-	users = UserService().get_all()
-	return jsonify([u.serialize() for u in users])
+    """Listado de usuarios
+    ---
+    responses:
+      200:
+        description: Listado de usuarios
+        schema:
+          $ref: '#/definitions/UsuarioDTO'
+    """
+    users = UserService().get_all()
+    return jsonify([u.serialize() for u in users])
 
 @bp.route('/sessions', methods=['POST'])
 def create_session():
+    """Crear una sesión para un usuario
+    ---
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+            $ref: '#/definitions/CrearSesionDTO'
+        required: true
+    definitions:
+        CrearSesionDTO:
+            type: object
+            properties:
+                email:
+                    type: string
+                password:
+                    type: string
+        SesionDTO:
+            type: object
+            properties:
+                token:
+                    type: string
+    responses:
+        200:
+            description: Objeto con token de sesión creada
+            schema:
+                $ref: '#/definitions/SesionDTO'
+    """
     data = request.get_json()
 
     email = data.get('email', '')
@@ -60,4 +148,19 @@ def create_session():
 
 @bp.route('/roles')
 def get_roles():
+    """Listado de roles
+    ---
+    definitions:
+        UsuarioDTO:
+            type: object
+            properties:
+                roles:
+                    type: array
+                    items: string
+    responses:
+        200:
+            description: Listado de roles
+            schema:
+                $ref: '#/definitions/UsuarioDTO'
+    """
     return jsonify({ 'roles': ROLES })

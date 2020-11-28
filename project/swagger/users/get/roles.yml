@@ -1,0 +1,14 @@
+Listado de roles
+  ---
+  definitions:
+      RolesDTO:
+        type: object
+        properties:
+            roles:
+                type: array
+                items: string
+  responses:
+      200:
+          description: Listado de roles
+          schema:
+              $ref: '#/definitions/RolesDTO'

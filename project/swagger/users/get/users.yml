@@ -1,0 +1,7 @@
+Listado de usuarios
+---
+responses:
+  200:
+    description: Listado de usuarios
+    schema:
+      $ref: '#/definitions/UsuarioDTO'

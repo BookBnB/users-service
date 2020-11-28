@@ -1,26 +1,27 @@
 version: '3.7'
 
 services:
-  project:
-    build: .
+  users_app:
+    image: python:3.8.6-slim-buster
     volumes:
       - .:/app
     ports:
       - 5000:5000
-    env_file:
-      - ./.env
+    env_file: .env
     depends_on:
-      - db
+      - users_db
+    working_dir: /app
+    command: ./run_dev.sh
 
-  db:
-    container_name: db
+  users_db:
+    container_name: users_db
     image: postgres:12-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=project
+      - POSTGRES_users_db=project
 
 volumes:
   postgres_data:

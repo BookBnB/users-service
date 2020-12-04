@@ -1,5 +1,5 @@
 import json
-from base64 import b64encode, b64decode
+from base64 import b64decode
 
 def build_user(n=0, role='host'):
 	nstr = (str(n) if n > 0 else '')

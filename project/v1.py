@@ -2,11 +2,10 @@ import datetime
 
 import jwt
 from flasgger import swag_from
-from flask import (Blueprint, Flask, current_app, jsonify, make_response,
+from flask import (Blueprint, current_app, jsonify, make_response,
                    request)
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import check_password_hash
 
-from project.db import db
 from project.models.role import ROLES
 from project.services.users_service import UserService
 

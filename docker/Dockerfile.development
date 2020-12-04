@@ -1,0 +1,12 @@
+# pull official base image
+FROM python:3.8.6-slim-buster
+
+# install dependencies
+RUN apt-get update && \
+    apt -y install postgresql postgresql-client
+
+# Switch to non-root user
+RUN useradd -ms /bin/bash user
+USER user
+RUN echo 'PATH=$PATH:$HOME/.local/bin' >> $HOME/.bashrc && \
+    pip3 install pipenv --user

@@ -1,6 +1,6 @@
-import os
 import pytest
-import tempfile
+from flask_migrate import upgrade
+from testing.postgresql import PostgresqlFactory
 
 from project import create_app
 from flask_migrate import upgrade, downgrade

@@ -2,9 +2,12 @@ version: '3.7'
 
 services:
   users_app:
-    image: python:3.8.6-slim-buster
+    build:
+      dockerfile: docker/Dockerfile.development
+      context: .
     volumes:
       - .:/app
+      - python_data:/home/user
     ports:
       - 5000:5000
     env_file: .env
@@ -21,7 +24,8 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_users_db=project
+      - POSTGRES_DB=${DB_NAME}
 
 volumes:
   postgres_data:
+  python_data:

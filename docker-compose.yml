@@ -15,6 +15,9 @@ services:
       - users_db
     working_dir: /app
     command: ./run_dev.sh
+    networks:
+      - users-net
+      - bookbnb-net
 
   users_db:
     container_name: users_db
@@ -25,7 +28,14 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=${DB_NAME}
+    networks:
+      - users-net
 
 volumes:
   postgres_data:
   python_data:
+
+networks:
+  users-net:
+  bookbnb-net:
+    name: bookbnb-net

@@ -6,6 +6,7 @@ from flasgger import Swagger
 import yaml
 import os
 
+
 def get_schemas():
     """
     Devuelve los schemas definidos en los archivos de swagger. Esto es necesario
@@ -27,7 +28,8 @@ def get_schemas():
                 schemas.update(content.get('components', {}).get('schemas', {}))
     return schemas
 
-def create_app(test_config = {}):
+
+def create_app(test_config={}):
     app = Flask(__name__)
     app.config.from_object("project.config.Config")
 
@@ -45,7 +47,13 @@ def create_app(test_config = {}):
         "components": {
             "schemas": get_schemas(),
             "examples": {},
-            "securitySchemes": {}
+            "securitySchemes": {
+                "token": {
+                    "type": "apiKey",
+                    "in": "header",
+                    "name": "Authorization"
+                }
+            }
         }
     }
 

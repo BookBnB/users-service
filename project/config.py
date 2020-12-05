@@ -14,8 +14,8 @@ class Config(object):
     SESSION_TOKEN_DURATION = int(os.getenv('SESSION_TOKEN_DURATION') or "86400")
 
     SWAGGER = {
-        "title": "BookBnB-usuarios",
-        "description": "Api de usuarios de BookBnB",
+        "title": "BookBnB: Usuarios",
+        "description": "",
         "termsOfService": '',
         "version": "1.0.0",
         "specs": [

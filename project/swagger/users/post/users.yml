@@ -54,3 +54,5 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/UsuarioDTO'
+security:
+ - token: []

@@ -1,51 +1,58 @@
 Creación de Usuario
 ---
-parameters:
-  - name: body
-    in: body
-    required: true
-    schema:
-        $ref: '#/definitions/CrearUsuarioDTO'
-    required: true
-definitions:
-  CrearUsuarioDTO:
-    type: object
-    properties:
-      email:
-        type: string
-      name:
-        type: string
-      surname:
-        type: string
-      password:
-        type: string
-      role:
-        type: string
-      phone:
-        type: string
-      city:
-        type: string
-  UsuarioDTO:
-    type: object
-    properties:
-      id:
-        type: string
-      email:
-        type: string
-      name:
-        type: string
-      surname:
-        type: string
-      password:
-        type: string
-      role:
-        type: string
-      phone:
-        type: string
-      city:
-        type: string
+tags:
+  - Usuario
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+          $ref: '#/components/schemas/CrearUsuarioDTO'
+
+components:
+  schemas:
+    CrearUsuarioDTO:
+      type: object
+      properties:
+        email:
+          type: string
+        name:
+          type: string
+        surname:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+        phone:
+          type: string
+        city:
+          type: string
+    UsuarioDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+        surname:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+        phone:
+          type: string
+        city:
+          type: string
 responses:
   200:
     description: Datos del usuario creado
-    schema:
-      $ref: '#/definitions/UsuarioDTO'
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/UsuarioDTO'
+security:
+ - token: []

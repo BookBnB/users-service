@@ -14,7 +14,7 @@ def build_user(n=0, role='host'):
 	}
 
 def create_user(client, data_dict):
-	res = client.post(path='/v1/users', data=json.dumps(data_dict), content_type='application/json')
+	res = client.post(path='/v1/usuarios', data=json.dumps(data_dict), content_type='application/json')
 	return res.status_code, json.loads(res.data.decode())
 
 def validate_create_user_response(status, res, role):
@@ -199,7 +199,7 @@ def test_create_and_list_users(client):
 	create_user(client, build_user(1))
 	create_user(client, build_user(2))
 
-	res = client.get(path='/v1/users')
+	res = client.get(path='/v1/usuarios')
 
 	users_array = json.loads(res.data.decode())
 
@@ -209,7 +209,7 @@ def test_login(client):
 	user = build_user(role='guest')
 	create_user(client, user)
 
-	res = client.post(path='/v1/sessions', data=json.dumps({
+	res = client.post(path='/v1/sesiones', data=json.dumps({
         'email': user['email'],
         'password': user['password']
     }), content_type='application/json')
@@ -232,7 +232,7 @@ def test_login_wrong_password(client):
 	user = build_user()
 	create_user(client, user)
 
-	res = client.post(path='/v1/sessions', data=json.dumps({
+	res = client.post(path='/v1/sesiones', data=json.dumps({
         'email': user['email'],
         'password': 'wrongpassword'
     }), content_type='application/json')
@@ -246,7 +246,7 @@ def test_login_wrong_user(client):
 	user = build_user()
 	create_user(client, user)
 
-	res = client.post(path='/v1/sessions', data=json.dumps({
+	res = client.post(path='/v1/sesiones', data=json.dumps({
         'email': 'wronguser@test.com',
         'password': user['password']
     }), content_type='application/json')
@@ -260,7 +260,7 @@ def test_login_empty_header(client):
 	user = build_user()
 	create_user(client, user)
 
-	res = client.post(path='/v1/sessions', data=json.dumps({}), content_type='application/json')
+	res = client.post(path='/v1/sesiones', data=json.dumps({}), content_type='application/json')
 
 	res_json = res.get_json()
 

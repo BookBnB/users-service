@@ -11,7 +11,7 @@ from project.services.users_service import UserService
 
 bp = Blueprint('v1', __name__, url_prefix='/v1')
 
-@bp.route('/users', methods=['POST'])
+@bp.route('/usuarios', methods=['POST'])
 @swag_from('swagger/users/post/users.yml')
 def users_create():
     body = request.get_json()
@@ -24,13 +24,13 @@ def users_create():
     except ValueError as ex:
         return make_response({ 'message': str(ex) }, 400)
 
-@bp.route('/users', methods=['GET'])
+@bp.route('/usuarios', methods=['GET'])
 @swag_from('swagger/users/get/users.yml')
 def users_list():
     users = UserService().get_all()
     return jsonify([u.serialize() for u in users])
 
-@bp.route('/sessions', methods=['POST'])
+@bp.route('/sesiones', methods=['POST'])
 @swag_from('swagger/users/post/sessions.yml')
 def create_session():
     data = request.get_json()

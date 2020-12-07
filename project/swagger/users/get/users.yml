@@ -1,7 +1,11 @@
 Listado de usuarios
 ---
+tags:
+  - Usuario
 responses:
   200:
     description: Listado de usuarios
-    schema:
-      $ref: '#/definitions/UsuarioDTO'
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/UsuarioDTO'

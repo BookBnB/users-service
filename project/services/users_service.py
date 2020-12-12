@@ -1,7 +1,8 @@
 from project.db import db
-from project.models.user import User
+from project.models.user import User, BookBnBUser
 from werkzeug.security import generate_password_hash
 from project.models.role import ROLES
+
 
 class UserService():
     def assert_key(self, values_dict, key):
@@ -25,9 +26,9 @@ class UserService():
 
         hashed_password = generate_password_hash(values_dict['password'], method='sha256')
 
-        user = User(values_dict['email'], values_dict['name'], values_dict['surname'],
-                    hashed_password, values_dict['role'], values_dict.get('phone', ''),
-                    values_dict.get('city', ''))
+        user = BookBnBUser(values_dict['email'], values_dict['name'], values_dict['surname'],
+                           hashed_password, values_dict['role'], values_dict.get('phone', ''),
+                           values_dict.get('city', ''))
 
         db.session.add(user)
         db.session.commit()

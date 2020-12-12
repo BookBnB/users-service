@@ -16,7 +16,6 @@ def get_schemas():
     schemas = {}
     for (dirpath, dirnames, filenames) in os.walk('project/swagger'):
         for filePath in (os.path.join(dirpath, file) for file in filenames):
-            print(filePath)
             with open(filePath) as file:
                 file_content = file.read()
                 comment_index = file_content.rfind('---')

@@ -29,8 +29,11 @@ def users_create():
 def google_users_create():
     oauth = OAuth(current_app.config['GOOGLE_CLIENT_ID'])
     body = request.get_json()
+    users_service = UserService()
+
     try:
         info = oauth.verify(body['token'])
+        user = users_service.create_oauth_user(body)
         print(info, flush=True)
     except TokenError as e:
         return make_response({'error': 'TokenError', 'message': str(e)}, 400)

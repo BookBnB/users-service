@@ -22,6 +22,9 @@ components:
           type: string
         city:
           type: string
+      required:
+        - token
+        - role
 responses:
   200:
     description: Datos del usuario creado
@@ -29,5 +32,3 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/UsuarioDTO'
-security:
- - token: []

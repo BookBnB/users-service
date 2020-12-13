@@ -15,6 +15,9 @@ class UserService():
 
         return user
 
+    def create_oauth_user(self, values_dict):
+        pass
+
     def get_all(self):
         return User.query.all()
 

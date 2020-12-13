@@ -1,6 +1,6 @@
 from project.db import db
 from sqlalchemy.dialects.postgresql import UUID
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 import uuid
 
 from project.models.role import ROLES
@@ -72,6 +72,8 @@ class BookBnBUser(User):
         hashed_password = generate_password_hash(kwargs['password'], method='sha256')
         self.password = hashed_password
 
+    def password_matches(self, password):
+        return check_password_hash(self.password, password)
 
 class OAuthUser(User):
     __mapper_args__ = {

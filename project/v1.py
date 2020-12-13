@@ -4,7 +4,6 @@ import jwt
 from flasgger import swag_from
 from flask import (Blueprint, current_app, jsonify, make_response,
                    request)
-from werkzeug.security import check_password_hash
 
 from project.models.role import ROLES
 from project.services.users_service import UserService
@@ -46,7 +45,7 @@ def create_session():
     if not user:
         return make_response({ 'message': 'User not recognized' }, 401)
 
-    if check_password_hash(user.password, password):
+    if user.password_matches(password):
         token_duration = datetime.timedelta(seconds=current_app.config['SESSION_TOKEN_DURATION'])
 
         token = jwt.encode({

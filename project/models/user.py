@@ -1,6 +1,9 @@
 from project.db import db
 from sqlalchemy.dialects.postgresql import UUID
+from werkzeug.security import generate_password_hash
 import uuid
+
+from project.models.role import ROLES
 
 
 class User(db.Model):
@@ -13,21 +16,31 @@ class User(db.Model):
     role = db.Column(db.String(128), nullable=False)
     phone = db.Column(db.String(128))
     city = db.Column(db.String(128))
-    type = db.Column(db.String(50))
+    type = db.Column(db.String(50), nullable=False)
 
     __mapper_args__ = {
         'polymorphic_on': type,
         'polymorphic_identity': 'users'
     }
 
-    def __init__(self, email, name, surname, password, role, phone, city):
-        self.email = email
-        self.name = name
-        self.surname = surname
-        self.password = password
-        self.role = role
-        self.phone = phone
-        self.city = city
+    def __init__(self, **kwargs):
+        self.assert_key(kwargs, 'name')
+        self.assert_key(kwargs, 'surname')
+        self.assert_key(kwargs, 'email')
+
+        if kwargs.get('role', '') not in ROLES:
+            raise ValueError('Invalid user role')
+
+        self.email = kwargs['email']
+        self.name = kwargs['name']
+        self.surname = kwargs['surname']
+        self.role = kwargs['role']
+        self.phone = kwargs.get('phone', None)
+        self.city = kwargs.get('city', None)
+
+    def assert_key(self, values_dict, key):
+        if not values_dict.get(key, ''):
+            raise ValueError('Missing user %s' % key)
 
     def serialize(self):
         return {
@@ -47,6 +60,17 @@ class BookBnBUser(User):
     __mapper_args__ = {
         'polymorphic_identity': 'bookbnb_user'
     }
+
+    def __init__(self, **kwargs):
+        self.assert_key(kwargs, 'password')
+
+        if len(kwargs['password']) < 8:
+            raise ValueError('Invalid user password: expected length of 8 characters')
+
+        super().__init__(**kwargs)
+
+        hashed_password = generate_password_hash(kwargs['password'], method='sha256')
+        self.password = hashed_password
 
 
 class OAuthUser(User):

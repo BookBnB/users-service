@@ -14,10 +14,11 @@ def test_create_user_expired_token(client):
     assert 'TokenError' == res['error']
     assert 'Token expired' in res['message']
 
-
 def test_create_user_invalid_token(client):
-    status, res = create_user(client, 's.s.s')
+    for token in ['s.s.s', 'a.b.c']:
+        status, res = create_user(client, token)
 
-    assert status == 400
-    assert 'TokenError' == res['error']
-    assert 'Invalid base64-encoded string' in res['message']
+        assert status == 400
+        assert 'TokenError' == res['error']
+        assert 'Invalid base64-encoded string' in res['message']
+

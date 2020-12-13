@@ -5,6 +5,7 @@ from flasgger import swag_from
 from flask import (Blueprint, current_app, jsonify, make_response,
                    request)
 
+from project.infra.oauth import OAuth, TokenError
 from project.models.role import ROLES
 from project.services.users_service import UserService
 
@@ -22,6 +23,17 @@ def users_create():
         return jsonify(user.serialize())
     except ValueError as ex:
         return make_response({ 'message': str(ex) }, 400)
+
+@bp.route('/usuarios/google', methods=['POST'])
+@swag_from('swagger/users/post/google-users.yml')
+def google_users_create():
+    oauth = OAuth(current_app.config['GOOGLE_CLIENT_ID'])
+    body = request.get_json()
+    try:
+        info = oauth.verify(body['token'])
+        print(info, flush=True)
+    except TokenError as e:
+        return make_response({'error': 'TokenError', 'message': str(e)}, 400)
 
 @bp.route('/usuarios', methods=['GET'])
 @swag_from('swagger/users/get/users.yml')

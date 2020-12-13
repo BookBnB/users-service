@@ -39,8 +39,6 @@ components:
           type: string
         surname:
           type: string
-        password:
-          type: string
         role:
           type: string
         phone:

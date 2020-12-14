@@ -30,8 +30,13 @@ def users_create(users: UserService):
 def google_users_create(users: UserService, oauth: OAuth):
     body = request.get_json()
 
+    token = body.get('token', None)
+
+    if not token:
+        return make_response({'message': 'Missing token'}, 400)
+
     try:
-        info = oauth.verify(body['token'])
+        info = oauth.verify(token)
         user = users.create_oauth_user({
             'name': info['given_name'],
             'surname': info['family_name'],

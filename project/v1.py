@@ -13,12 +13,11 @@ bp = Blueprint('v1', __name__, url_prefix='/v1')
 
 @bp.route('/usuarios', methods=['POST'])
 @swag_from('swagger/users/post/users.yml')
-def users_create():
+def users_create(users: UserService):
     body = request.get_json()
 
     try:
-        service = UserService()
-        user = service.create_user(body)
+        user = users.create_user(body)
 
         return jsonify(user.serialize())
     except ValueError as ex:
@@ -26,14 +25,12 @@ def users_create():
 
 @bp.route('/usuarios/google', methods=['POST'])
 @swag_from('swagger/users/post/google-users.yml')
-def google_users_create():
-    oauth = OAuth(current_app.config['GOOGLE_CLIENT_ID'])
+def google_users_create(users: UserService, oauth: OAuth):
     body = request.get_json()
-    users_service = UserService()
 
     try:
         info = oauth.verify(body['token'])
-        user = users_service.create_oauth_user({
+        user = users.create_oauth_user({
             'name': info['given_name'],
             'surname': info['family_name'],
             'email': info['email'],
@@ -47,15 +44,14 @@ def google_users_create():
 
 @bp.route('/usuarios', methods=['GET'])
 @swag_from('swagger/users/get/users.yml')
-def users_list():
-    users = UserService().get_all()
+def users_list(users: UserService):
+    users = users.get_all()
     return jsonify([u.serialize() for u in users])
 
 @bp.route('/sesiones', methods=['POST'])
 @swag_from('swagger/users/post/sessions.yml')
-def create_session():
+def create_session(users: UserService, tokenizer: Tokenizer):
     data = request.get_json()
-    tokenizer = Tokenizer(current_app.config['SECRET_KEY'])
 
     email = data.get('email', None)
     password = data.get('password', None)
@@ -63,7 +59,7 @@ def create_session():
     if not email or not password:
         return make_response({ 'message': 'User not recognized' }, 401)
 
-    user = UserService().find_by_email(email)
+    user = users.find_by_email(email)
 
     if not user:
         return make_response({ 'message': 'User not recognized' }, 401)
@@ -83,9 +79,7 @@ def create_session():
 
 @bp.route('/sesiones/google', methods=['POST'])
 @swag_from('swagger/users/post/google-sessions.yml')
-def create_google_session():
-    tokenizer = Tokenizer(current_app.config['SECRET_KEY'])
-    oauth = OAuth(current_app.config['GOOGLE_CLIENT_ID'])
+def create_google_session(users: UserService, tokenizer: Tokenizer, oauth: OAuth):
     body = request.get_json()
 
     token = body.get('token', None)
@@ -98,7 +92,7 @@ def create_google_session():
     except TokenError as e:
         return make_response({'error': 'TokenError', 'message': str(e)}, 400)
 
-    user = UserService().find_by_email(info['email'])
+    user = users.find_by_email(info['email'])
 
     if not user:
         return make_response({ 'message': 'User not recognized' }, 401)

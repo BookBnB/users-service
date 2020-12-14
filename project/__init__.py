@@ -1,6 +1,10 @@
 from flask import Flask
 from flask_migrate import Migrate
+from flask_injector import FlaskInjector
 from project.db import db
+from project.infra.google_oauth import OAuth
+from project.infra.tokenizer import Tokenizer
+from project.services.users_service import UserService
 from project.v1 import bp as bp_v1
 from flasgger import Swagger
 import yaml
@@ -56,6 +60,20 @@ def create_app(test_config={}):
         }
     }
 
-    swagger = Swagger(app, template=template)
+    Swagger(app, template=template)
+
+
+    def configure(binder):
+        binder.bind(
+            OAuth,
+            to=OAuth(app.config['GOOGLE_CLIENT_ID']),
+        )
+
+        binder.bind(
+            Tokenizer,
+            to=Tokenizer(app.config['SECRET_KEY'])
+        )
+
+    FlaskInjector(app, modules=[configure])
 
     return app

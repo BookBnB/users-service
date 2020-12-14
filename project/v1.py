@@ -56,8 +56,8 @@ def users_list():
 def create_session():
     data = request.get_json()
 
-    email = data.get('email', '')
-    password = data.get('password', '')
+    email = data.get('email', None)
+    password = data.get('password', None)
 
     if not email or not password:
         return make_response({ 'message': 'User not recognized' }, 401)

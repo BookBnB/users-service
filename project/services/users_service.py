@@ -4,8 +4,8 @@ from project.models.user import User, BookBnBUser, OAuthUser
 
 class UserService():
 
-    def create_user(self, values_dict):
-        user = BookBnBUser(**values_dict)
+    def _create_user(self, clazz, values):
+        user = clazz(**values)
 
         if self.find_by_email(user.email) is not None:
             raise ValueError('User already exists')
@@ -14,17 +14,12 @@ class UserService():
         db.session.commit()
 
         return user
+
+    def create_user(self, values_dict):
+        return self._create_user(BookBnBUser, values_dict)
 
     def create_oauth_user(self, values_dict):
-        user = OAuthUser(**values_dict)
-
-        if self.find_by_email(user.email) is not None:
-            raise ValueError('User already exists')
-
-        db.session.add(user)
-        db.session.commit()
-
-        return user
+        return self._create_user(OAuthUser, values_dict)
 
     def get_all(self):
         return User.query.all()

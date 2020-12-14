@@ -13,8 +13,6 @@ class OAuth:
 
     def verify(self, token):
         try:
-            idinfo = id_token.verify_oauth2_token(token, requests.Request(), self.client_id)
-            print(idinfo, flush=True)
-            return idinfo
+            return id_token.verify_oauth2_token(token, requests.Request(), self.client_id)
         except ValueError as e:
             raise TokenError(str(e))

@@ -44,23 +44,15 @@ interactions:
         1yBQzw/vJfclO6QxtHZe6m8/0uN1We0uJjR9EFrOrkvjedyo569orazr1NMoPFSdaZjvRDJg/U7V
         rHvvlT932Lf/fvsfGfn+B4sJAAA=
     headers:
-      Age:
-      - '24'
       Alt-Svc:
       - h3-29=":443"; ma=2592000,h3-T051=":443"; ma=2592000,h3-Q050=":443"; ma=2592000,h3-Q046=":443";
         ma=2592000,h3-Q043=":443"; ma=2592000,quic=":443"; ma=2592000; v="46,43"
-      Cache-Control:
-      - public, max-age=23973, must-revalidate, no-transform
       Content-Encoding:
       - gzip
       Content-Length:
       - '1559'
       Content-Type:
       - application/json; charset=UTF-8
-      Date:
-      - Sun, 13 Dec 2020 16:12:04 GMT
-      Expires:
-      - Sun, 13 Dec 2020 22:51:37 GMT
       Server:
       - ESF
       Vary:
@@ -73,6 +65,12 @@ interactions:
       - SAMEORIGIN
       X-XSS-Protection:
       - '0'
+      cache-control:
+      - public, max-age=18345, must-revalidate, no-transform
+      date:
+      - Sun, 13 Dec 2020 23:54:33 GMT
+      expires:
+      - Mon, 14 Dec 2020 05:00:18 GMT
     status:
       code: 200
       message: OK

@@ -1,5 +1,5 @@
 from project.db import db
-from project.models.user import User, BookBnBUser
+from project.models.user import User, BookBnBUser, OAuthUser
 
 
 class UserService():
@@ -16,7 +16,15 @@ class UserService():
         return user
 
     def create_oauth_user(self, values_dict):
-        pass
+        user = OAuthUser(**values_dict)
+
+        if self.find_by_email(user.email) is not None:
+            raise ValueError('User already exists')
+
+        db.session.add(user)
+        db.session.commit()
+
+        return user
 
     def get_all(self):
         return User.query.all()

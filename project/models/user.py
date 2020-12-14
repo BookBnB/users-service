@@ -55,7 +55,7 @@ class User(db.Model):
 
 
 class BookBnBUser(User):
-    password = db.Column(db.String(128), nullable=False)
+    password = db.Column(db.String(128))
 
     __mapper_args__ = {
         'polymorphic_identity': 'bookbnb_user'

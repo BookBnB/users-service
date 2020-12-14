@@ -5,7 +5,7 @@ from flasgger import swag_from
 from flask import (Blueprint, current_app, jsonify, make_response,
                    request)
 
-from project.infra.oauth import OAuth, TokenError
+from project.infra.google_oauth import OAuth, TokenError
 from project.models.role import ROLES
 from project.services.users_service import UserService
 
@@ -33,8 +33,15 @@ def google_users_create():
 
     try:
         info = oauth.verify(body['token'])
-        user = users_service.create_oauth_user(body)
-        print(info, flush=True)
+        user = users_service.create_oauth_user({
+            'name': info['given_name'],
+            'surname': info['family_name'],
+            'email': info['email'],
+            'role': body.get('role', None),
+            'phone': body.get('phone', None),
+            'city': body.get('city', None)
+        })
+        return jsonify(user.serialize())
     except TokenError as e:
         return make_response({'error': 'TokenError', 'message': str(e)}, 400)
 

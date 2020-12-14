@@ -2,6 +2,7 @@ import json
 import vcr
 from freezegun import freeze_time
 from base64 import b64decode
+from tests.test_users import create_user as create_user_with_password, build_user
 
 VCR_GOOGLE_CERTIFICATE = 'tests/vcr_cassettes/google_token_certificate.yaml'
 EXPIRED_TOKEN = 'eyJhbGciOiJSUzI1NiIsImtpZCI6ImQ0Y2JhMjVlNTYzNjYwYTkwMDlkODIwYTFjMDIwMjIwNzA1NzRlODIiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiI3MzgyNzY0ODI1ODEtOTFjODZkYmk4ZGdxOXJvYmZja2ZscWQ4cTB0c3U4Z3QuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI3MzgyNzY0ODI1ODEtN3BoczFvajMxcHBsdmgybjVjODdkMTVtZm9zMjc5MXUuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMTE4NDkzOTU2NjMzMjgwMzg5MDUiLCJoZCI6ImZpLnViYS5hciIsImVtYWlsIjoiZmZ1c2Fyb0BmaS51YmEuYXIiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwibmFtZSI6IkZyYW5jbyBGdXNhcm8iLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EtL0FPaDE0R2d5WERPcHQxWTVlVVJXUEJzZ3RzVVZxU0JzMlBLR1VPcU0yV2RzPXM5Ni1jIiwiZ2l2ZW5fbmFtZSI6IkZyYW5jbyIsImZhbWlseV9uYW1lIjoiRnVzYXJvIiwibG9jYWxlIjoiZXMiLCJpYXQiOjE2MDc2MTM1NDksImV4cCI6MTYwNzYxNzE0OX0.RHRP2yCScys5xwszr98ipmUsUoFMBXlSUMPpGoJEChI6NRbK8K1b0StE1FZ_VPAeEdc7x3YZ037QYQz7xR5daRe1umIOGdohxkqdKaadHrr6VSoN6Hm329244LE8uSq1fvDgyHjPnnZtOGmhoHLCIyP1V1760i8XJxg8k6Tfgl5UPfis8FtlKKAkrKG7unosccjBixZFsI7C3wlr9gQpGnzn8Lh0CpZc8JqXzMe1Qezz_cJCVr_TuE0RvBNhsTGaYHhiKcPAKem_ehen5HFtk5jqiMtJYEWTsXF2kRB8LSuakg4rd9FpIBsqWiYS-ZswxIVB5j-s2Q7mqHVxjcjPEQ'
@@ -102,4 +103,49 @@ def test_login_valid(client):
     assert data['id']
     assert data['email'] == 'sblazquez@fi.uba.ar'
     assert data['role'] == 'host'
+    assert data['exp']
+
+
+@freeze_time(VALID_DATE)
+def test_login_with_password_and_google(client):
+    # Create user
+    user = build_user()
+    user['email'] = 'sblazquez@fi.uba.ar'
+    create_user_with_password(client, user)
+
+    # Login password
+    res = client.post(path='/v1/sesiones', data=json.dumps({
+        'email': user['email'],
+        'password': user['password']
+    }), content_type='application/json')
+
+    base64_data = res.get_json()['token'].split('.')[1]
+
+    missing_padding = len(base64_data) % 4
+    if missing_padding:
+        base64_data += (b'=' * (4 - missing_padding)).decode()
+
+    decoded_data = b64decode(base64_data.encode()).decode()
+    data = json.loads(decoded_data)
+
+    assert res.status_code == 200
+    assert data['id']
+    assert data['email'] == 'sblazquez@fi.uba.ar'
+    assert data['exp']
+
+    # Login google
+    status, res = login(client, VALID_TOKEN)
+
+    base64_data = res['token'].split('.')[1]
+
+    missing_padding = len(base64_data) % 4
+    if missing_padding:
+        base64_data += (b'=' * (4 - missing_padding)).decode()
+
+    decoded_data = b64decode(base64_data.encode()).decode()
+    data = json.loads(decoded_data)
+
+    assert status == 200
+    assert data['id']
+    assert data['email'] == 'sblazquez@fi.uba.ar'
     assert data['exp']

@@ -2,7 +2,7 @@ from project.db import db
 from project.models.user import User, BookBnBUser, OAuthUser
 
 
-class UserService():
+class UserService:
 
     def _create_user(self, clazz, values):
         user = clazz(**values)

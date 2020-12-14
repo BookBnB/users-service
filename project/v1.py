@@ -7,6 +7,7 @@ from flask import (Blueprint, current_app, jsonify, make_response,
 from project.infra.google_oauth import OAuth, TokenError
 from project.infra.tokenizer import Tokenizer
 from project.models.role import ROLES
+from project.models.user import UserDoesntHavePasswordError
 from project.services.users_service import UserService
 
 bp = Blueprint('v1', __name__, url_prefix='/v1')
@@ -64,8 +65,11 @@ def create_session(users: UserService, tokenizer: Tokenizer):
 
     user = users.find_by_email(email)
 
-    if not user or not user.password_matches(password):
-        return make_response({'message': 'User not recognized'}, 401)
+    try:
+        if not user or not user.password_matches(password):
+            return make_response({'message': 'User not recognized'}, 401)
+    except UserDoesntHavePasswordError:
+        return make_response({'message': 'User doesn\'t have password'}, 401)
 
     return jsonify({'token': _generate_session_token(tokenizer, user)})
 

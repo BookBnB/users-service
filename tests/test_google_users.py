@@ -149,3 +149,22 @@ def test_login_with_password_and_google(client):
     assert data['id']
     assert data['email'] == 'sblazquez@fi.uba.ar'
     assert data['exp']
+
+
+@freeze_time(VALID_DATE)
+def test_login_google_cant_login_with_password(client):
+    # Create user
+    create_user(client, VALID_TOKEN)
+
+    # Login password
+    user = build_user()
+    user['email'] = 'sblazquez@fi.uba.ar'
+    res = client.post(path='/v1/sesiones', data=json.dumps({
+        'email': user['email'],
+        'password': user['password']
+    }), content_type='application/json')
+
+    res_json = res.get_json()
+
+    assert res.status_code == 401
+    assert res_json['message'] == 'User doesn\'t have password'

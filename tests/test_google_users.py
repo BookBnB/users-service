@@ -59,8 +59,17 @@ def test_create_user_valid(client):
     assert res['surname'] == 'Blázquez Olivera'
 
 
+def test_login_invalid_token(client):
+    for token in ['s.s.s', 'a.b.c']:
+        status, res = login(client, token)
+
+        assert status == 400
+        assert 'TokenError' == res['error']
+        assert 'Invalid base64-encoded string' in res['message']
+
+
 @freeze_time("2020-12-14 00:00:00Z")
-def test_login(client):
+def test_login_valid(client):
     token = 'eyJhbGciOiJSUzI1NiIsImtpZCI6ImUxOTdiZjJlODdiZDE5MDU1NzVmOWI2ZTVlYjQyNmVkYTVkNTc0ZTMiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiI0MDc0MDg3MTgxOTIuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI0MDc0MDg3MTgxOTIuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMTEwNjAyMDg1MDMxOTkzNTE2MTAiLCJoZCI6ImZpLnViYS5hciIsImVtYWlsIjoic2JsYXpxdWV6QGZpLnViYS5hciIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJhdF9oYXNoIjoibThhVV9KOFJydFEtUTk4NnNLWEgwQSIsIm5hbWUiOiJTZWJhc3Rpw6FuIEFsZWphbmRybyBCbMOhenF1ZXogT2xpdmVyYSIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS0vQU9oMTRHaTBTTEk3QWtzenVOWHNtd19FcnV0cnFldjRxSFNDTUpwZlMwbk49czk2LWMiLCJnaXZlbl9uYW1lIjoiU2ViYXN0acOhbiBBbGVqYW5kcm8iLCJmYW1pbHlfbmFtZSI6IkJsw6F6cXVleiBPbGl2ZXJhIiwibG9jYWxlIjoiZXMiLCJpYXQiOjE2MDc5MDM4MjIsImV4cCI6MTYwNzkwNzQyMn0.B7DOtaUKDFfKPyTugsAep8kCsXXl6S7QIux53K5DiYC9qKx37cP3kSN09h1mm6k-XPIKBnkng6NTEAafhzCvYUKF2grcyhQQpXkK-RR-hlbpn0KomShN6xzQiQYWpTXAjGAE9g-2ukHWO2MoWTudLFwV1mHBTQl2FnEwJ_QYdrZh_Kkdq-6-ycZJxW12LvH3n6lyGawIUN2ZizWjU8wiv5cs3YHgZYvwe0ufI9e8RoYVSwfb2dmSx_PH5Quo7I8EsIqcnNQQjlWZ48Ko3jQcYSKkdPMutxctuePTDggXI3cNZZLoaXla7QVrqrHUtfxjAQdqKn1cP3cyaKXYnXvjZQ'
     create_user(
         client,

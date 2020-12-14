@@ -32,7 +32,7 @@ def get_schemas():
     return schemas
 
 
-def create_app(test_config={}):
+def create_app(test_config=None):
     app = Flask(__name__)
     app.config.from_object("project.config.Config")
 
@@ -41,10 +41,18 @@ def create_app(test_config={}):
 
     db.init_app(app)
 
-    migrate = Migrate(app, db)
+    Migrate(app, db)
 
     app.register_blueprint(bp_v1)
 
+    configure_swagger(app)
+
+    configure_dependencies(app)
+
+    return app
+
+
+def configure_swagger(app):
     template = {
         "openapi": "3.0.3",
         "components": {
@@ -63,6 +71,7 @@ def create_app(test_config={}):
     Swagger(app, template=template)
 
 
+def configure_dependencies(app):
     def configure(binder):
         binder.bind(
             OAuth,
@@ -75,5 +84,3 @@ def create_app(test_config={}):
         )
 
     FlaskInjector(app, modules=[configure])
-
-    return app

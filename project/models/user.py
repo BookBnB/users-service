@@ -53,6 +53,9 @@ class User(db.Model):
             "city": self.city
         }
 
+    def password_matches(self, password):
+        raise NotImplementedError()
+
 
 class BookBnBUser(User):
     password = db.Column(db.String(128))
@@ -79,3 +82,9 @@ class OAuthUser(User):
     __mapper_args__ = {
         'polymorphic_identity': 'oauth_ser'
     }
+
+    def password_matches(self, password):
+        raise UserDoesntHavePasswordError('OAuthUser doesn\'t have password')
+
+class UserDoesntHavePasswordError(Exception):
+    pass

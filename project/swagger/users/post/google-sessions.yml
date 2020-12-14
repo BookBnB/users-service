@@ -1,0 +1,26 @@
+Crear una sesión para un usuario
+---
+tags:
+  - Sesion
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: '#/components/schemas/CrearOAuthSesionDTO'
+
+responses:
+  200:
+    description: Objeto con token de sesión creada
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/SesionDTO'
+
+components:
+  schemas:
+    CrearOAuthSesionDTO:
+      type: object
+      properties:
+        token:
+          type: string

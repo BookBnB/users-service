@@ -1,6 +1,5 @@
 import datetime
 
-import jwt
 from flasgger import swag_from
 from flask import (Blueprint, current_app, jsonify, make_response,
                    request)
@@ -71,6 +70,38 @@ def create_session():
 
     if not user.password_matches(password):
         return make_response({'message': 'User not recognized'}, 401)
+
+    token_duration = datetime.timedelta(seconds=current_app.config['SESSION_TOKEN_DURATION'])
+
+    token = tokenizer.encode({
+            'id': str(user.id),
+            'email': user.email,
+            'exp': datetime.datetime.utcnow() + token_duration,
+            'role': user.role
+        })
+    return jsonify({'token': token.decode('UTF-8')})
+
+@bp.route('/sesiones/google', methods=['POST'])
+@swag_from('swagger/users/post/google-sessions.yml')
+def create_google_session():
+    tokenizer = Tokenizer(current_app.config['SECRET_KEY'])
+    oauth = OAuth(current_app.config['GOOGLE_CLIENT_ID'])
+    body = request.get_json()
+
+    token = body.get('token', None)
+
+    if not token:
+        return make_response({ 'message': 'Missing token' }, 400)
+
+    try:
+        info = oauth.verify(token)
+    except TokenError as e:
+        return make_response({'error': 'TokenError', 'message': str(e)}, 400)
+
+    user = UserService().find_by_email(info['email'])
+
+    if not user:
+        return make_response({ 'message': 'User not recognized' }, 401)
 
     token_duration = datetime.timedelta(seconds=current_app.config['SESSION_TOKEN_DURATION'])
 

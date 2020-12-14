@@ -1,10 +1,7 @@
 import pytest
-from flask_migrate import upgrade
-from testing.postgresql import PostgresqlFactory
 
 from project import create_app
 from flask_migrate import upgrade, downgrade
-from project.db import db
 from testing.postgresql import PostgresqlFactory
 
 Postgresql = PostgresqlFactory(cache_initialized_db=True)

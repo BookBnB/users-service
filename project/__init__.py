@@ -1,6 +1,10 @@
 from flask import Flask
 from flask_migrate import Migrate
+from flask_injector import FlaskInjector
 from project.db import db
+from project.infra.google_oauth import OAuth
+from project.infra.tokenizer import Tokenizer
+from project.services.users_service import UserService
 from project.v1 import bp as bp_v1
 from flasgger import Swagger
 import yaml
@@ -16,7 +20,6 @@ def get_schemas():
     schemas = {}
     for (dirpath, dirnames, filenames) in os.walk('project/swagger'):
         for filePath in (os.path.join(dirpath, file) for file in filenames):
-            print(filePath)
             with open(filePath) as file:
                 file_content = file.read()
                 comment_index = file_content.rfind('---')
@@ -29,7 +32,7 @@ def get_schemas():
     return schemas
 
 
-def create_app(test_config={}):
+def create_app(test_config=None):
     app = Flask(__name__)
     app.config.from_object("project.config.Config")
 
@@ -38,10 +41,18 @@ def create_app(test_config={}):
 
     db.init_app(app)
 
-    migrate = Migrate(app, db)
+    Migrate(app, db)
 
     app.register_blueprint(bp_v1)
 
+    configure_swagger(app)
+
+    configure_dependencies(app)
+
+    return app
+
+
+def configure_swagger(app):
     template = {
         "openapi": "3.0.3",
         "components": {
@@ -57,6 +68,19 @@ def create_app(test_config={}):
         }
     }
 
-    swagger = Swagger(app, template=template)
+    Swagger(app, template=template)
 
-    return app
+
+def configure_dependencies(app):
+    def configure(binder):
+        binder.bind(
+            OAuth,
+            to=OAuth(app.config['GOOGLE_CLIENT_ID']),
+        )
+
+        binder.bind(
+            Tokenizer,
+            to=Tokenizer(app.config['SECRET_KEY'])
+        )
+
+    FlaskInjector(app, modules=[configure])

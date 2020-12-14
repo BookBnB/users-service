@@ -13,6 +13,12 @@ ENV HOST=0.0.0.0
 # copy project
 COPY . /app
 
+# install pyyaml
+RUN apt-get update && \
+    libyaml-dev && \
+    pip uninstall pyyaml && \
+    pip --no-cache-dir install pyyaml
+
 # install dependencies
 RUN pip install -r requirements.txt && \
     echo "FLASK_APP=project/" >> .env && \

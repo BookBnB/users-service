@@ -3,7 +3,9 @@ FROM python:3.8.6-slim-buster
 
 # install dependencies
 RUN apt-get update && \
-    apt -y install postgresql postgresql-client
+    apt -y install postgresql postgresql-client libyaml-dev && \
+    pip uninstall pyyaml && \
+    pip --no-cache-dir install pyyaml
 
 # Switch to non-root user
 RUN useradd -ms /bin/bash user

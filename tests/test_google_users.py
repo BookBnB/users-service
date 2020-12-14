@@ -76,6 +76,14 @@ def test_login_expired_token(client):
 
 
 @freeze_time(VALID_DATE)
+def test_login_without_user_created(client):
+    status, res = login(client, VALID_TOKEN)
+
+    assert status == 401
+    assert 'User not recognized' in res['message']
+
+
+@freeze_time(VALID_DATE)
 def test_login_valid(client):
     create_user(client, VALID_TOKEN)
 

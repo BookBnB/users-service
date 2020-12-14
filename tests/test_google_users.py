@@ -47,7 +47,7 @@ def test_create_user_invalid_token(client):
         assert 'Invalid base64-encoded string' in res['message']
 
 
-def test_missing_token(client):
+def test_create_user_missing_token(client):
     with vcr.use_cassette(VCR_GOOGLE_CERTIFICATE):
         user = {
             'role': 'host'
@@ -94,6 +94,15 @@ def test_login_without_user_created(client):
 
     assert status == 401
     assert 'User not recognized' in res['message']
+
+
+def test_login_missing_token(client):
+    with vcr.use_cassette(VCR_GOOGLE_CERTIFICATE):
+        res = client.post(path='/v1/sesiones/google', data=json.dumps({}), content_type='application/json')
+
+    body = json.loads(res.data.decode())
+    assert res.status_code == 400
+    assert 'Missing token' in body['message']
 
 
 @freeze_time(VALID_DATE)

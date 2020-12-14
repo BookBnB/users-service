@@ -6,6 +6,7 @@ from flask import (Blueprint, current_app, jsonify, make_response,
                    request)
 
 from project.infra.google_oauth import OAuth, TokenError
+from project.infra.tokenizer import Tokenizer
 from project.models.role import ROLES
 from project.services.users_service import UserService
 
@@ -55,6 +56,7 @@ def users_list():
 @swag_from('swagger/users/post/sessions.yml')
 def create_session():
     data = request.get_json()
+    tokenizer = Tokenizer(current_app.config['SECRET_KEY'])
 
     email = data.get('email', None)
     password = data.get('password', None)
@@ -67,20 +69,18 @@ def create_session():
     if not user:
         return make_response({ 'message': 'User not recognized' }, 401)
 
-    if user.password_matches(password):
-        token_duration = datetime.timedelta(seconds=current_app.config['SESSION_TOKEN_DURATION'])
+    if not user.password_matches(password):
+        return make_response({'message': 'User not recognized'}, 401)
 
-        token = jwt.encode({
-                'id': str(user.id),
-                'email': user.email,
-                'exp': datetime.datetime.utcnow() + token_duration,
-                'role': user.role
-            },
-            current_app.config['SECRET_KEY']
-        )
-        return jsonify({'token': token.decode('UTF-8')})
+    token_duration = datetime.timedelta(seconds=current_app.config['SESSION_TOKEN_DURATION'])
 
-    return make_response({ 'message': 'User not recognized' }, 401)
+    token = tokenizer.encode({
+            'id': str(user.id),
+            'email': user.email,
+            'exp': datetime.datetime.utcnow() + token_duration,
+            'role': user.role
+        })
+    return jsonify({'token': token.decode('UTF-8')})
 
 @bp.route('/roles')
 @swag_from('swagger/users/get/roles.yml')

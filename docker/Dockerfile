@@ -15,7 +15,7 @@ COPY . /app
 
 # install pyyaml
 RUN apt-get update && \
-    libyaml-dev && \
+    apt-get -y install libyaml-dev && \
     pip uninstall pyyaml && \
     pip --no-cache-dir install pyyaml
 

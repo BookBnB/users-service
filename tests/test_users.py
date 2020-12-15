@@ -257,5 +257,5 @@ def test_login_missing_user_and_password(client):
 
     res_json = res.get_json()
 
-    assert res.status_code == 401
-    assert res_json['message'] == 'User not recognized'
+    assert res.status_code == 400
+    assert res_json['message'] == 'User or password missing'

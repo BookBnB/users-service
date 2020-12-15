@@ -66,7 +66,7 @@ def create_session(users: UserService, tokenizer: Tokenizer):
     password = data.get('password', None)
 
     if not email or not password:
-        return make_response({'message': 'User not recognized'}, 401)
+        return make_response({'message': 'User or password missing'}, 400)
 
     user = users.find_by_email(email)
 

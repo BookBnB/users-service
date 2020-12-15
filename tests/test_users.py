@@ -20,6 +20,14 @@ def create_user(client, data_dict):
     return res.status_code, json.loads(res.data.decode())
 
 
+def login(client, user):
+    res = client.post(path='/v1/sesiones', data=json.dumps({
+        'email': user['email'],
+        'password': user['password']
+    }), content_type='application/json')
+    return res.status_code, json.loads(res.data.decode())
+
+
 def validate_create_user_response(status, res, role):
     assert status == 200
     assert res['id']
@@ -86,125 +94,100 @@ def test_create_user_missing_name(client):
 
 
 def test_create_user_invalid_name(client):
-    status, res = create_user(client, {
-        'name': '',
-        'surname': 'testSurname',
-        'email': 'test@test.com',
-        'password': 'testPass'
-    })
+    user = build_user()
+    user['name'] = ''
+    status, res = create_user(client, user)
 
     assert status == 400
     assert res['message'] == 'Missing user name'
 
 
 def test_create_user_missing_surname(client):
-    status, res = create_user(client, {
-        'name': 'testName',
-        'email': 'test@test.com',
-        'password': 'testPass'
-    })
+    user = build_user()
+    del user['surname']
+    status, res = create_user(client, user)
 
     assert status == 400
     assert res['message'] == 'Missing user surname'
 
 
 def test_create_user_invalid_surname(client):
-    status, res = create_user(client, {
-        'name': 'testName',
-        'surname': '',
-        'email': 'test@test.com',
-        'password': 'testPass'
-    })
+    user = build_user()
+    user['surname'] = ''
+    status, res = create_user(client, user)
 
     assert status == 400
     assert res['message'] == 'Missing user surname'
 
 
 def test_create_user_missing_email(client):
-    status, res = create_user(client, {
-        'name': 'testName',
-        'surname': 'testSurname',
-        'password': 'testPass'
-    })
+    user = build_user()
+    del user['email']
+    status, res = create_user(client, user)
 
     assert status == 400
     assert res['message'] == 'Missing user email'
-
-
-def test_create_user_invalid_name(client):
-    status, res = create_user(client, {
-        'name': '',
-        'surname': 'testSurname',
-        'email': 'test@test.com',
-        'password': 'testPass'
-    })
-
-    assert status == 400
-    assert res['message'] == 'Missing user name'
 
 
 def test_create_user_empty_email(client):
-    status, res = create_user(client, {
-        'email': '',
-        'name': 'testName',
-        'surname': 'testSurname',
-        'password': 'testPass'
-    })
+    user = build_user()
+    user['email'] = ''
+    status, res = create_user(client, user)
 
     assert status == 400
     assert res['message'] == 'Missing user email'
 
 
+def test_create_user_invalid_email(client):
+    user = build_user()
+    user['email'] = 'someInvalidEmail'
+    status, res = create_user(client, user)
+
+    assert status == 400
+    assert res['message'] == 'Invalid email'
+
+
 def test_create_user_missing_password(client):
-    status, res = create_user(client, {
-        'name': 'testName',
-        'email': 'test@test.com',
-        'surname': 'testSurname',
-    })
+    user = build_user()
+    del user['password']
+    status, res = create_user(client, user)
 
     assert status == 400
     assert res['message'] == 'Missing user password'
 
 
 def test_create_user_empty_password(client):
-    status, res = create_user(client, {
-        'name': 'testName',
-        'surname': 'testSurname',
-        'email': 'test@test.com',
-        'password': ''
-    })
+    user = build_user()
+    user['password'] = ''
+    status, res = create_user(client, user)
 
     assert status == 400
     assert res['message'] == 'Missing user password'
 
 
 def test_create_user_invalid_password(client):
-    status, res = create_user(client, {
-        'name': 'testName',
-        'surname': 'testSurname',
-        'email': 'test@test.com',
-        'password': 'short'
-    })
+    user = build_user()
+    user['password'] = 'short'
+    status, res = create_user(client, user)
 
     assert status == 400
     assert res['message'] == 'Invalid user password: expected length of 8 characters'
 
 
 def test_create_user_missing_optional_fields(client):
-    status, res = create_user(client, {
-        'name': 'testName',
-        'surname': 'testSurname',
-        'email': 'test@test.com',
-        'password': 'password',
-        'role': 'guest'
-    })
+    user = build_user()
+    del user['phone']
+    del user['city']
+    status, res = create_user(client, user)
 
     assert status == 200
     assert res['id']
-    assert res['name'] == 'testName'
-    assert res['surname'] == 'testSurname'
-    assert res['email'] == 'test@test.com'
-    assert res['role'] == 'guest'
+    assert res['name'] == user['name']
+    assert res['surname'] == user['surname']
+    assert res['email'] == user['email']
+    assert res['role'] == user['role']
+    assert res['phone'] is None
+    assert res['city'] is None
 
 
 def test_get_roles(client):
@@ -231,12 +214,8 @@ def test_login(client):
     user = build_user(role='guest')
     create_user(client, user)
 
-    res = client.post(path='/v1/sesiones', data=json.dumps({
-        'email': user['email'],
-        'password': user['password']
-    }), content_type='application/json')
-
-    base64_data = res.get_json()['token'].split('.')[1]
+    status, res = login(client, user)
+    base64_data = res['token'].split('.')[1]
 
     if len(base64_data) % 2 != 0:
         base64_data += '='
@@ -244,10 +223,10 @@ def test_login(client):
     decoded_data = b64decode(base64_data.encode()).decode()
     data = json.loads(decoded_data)
 
-    assert res.status_code == 200
+    assert status == 200
     assert data['id']
-    assert data['email'] == 'test@test.com'
-    assert data['role'] == 'guest'
+    assert data['email'] == user['email']
+    assert data['role'] == user['role']
     assert data['exp']
 
 
@@ -255,36 +234,25 @@ def test_login_wrong_password(client):
     user = build_user()
     create_user(client, user)
 
-    res = client.post(path='/v1/sesiones', data=json.dumps({
-        'email': user['email'],
-        'password': 'wrongpassword'
-    }), content_type='application/json')
+    user['password'] = 'wrongpassword'
+    status, res = login(client, user)
 
-    res_json = res.get_json()
-
-    assert res.status_code == 401
-    assert res_json['message'] == 'User not recognized'
+    assert status == 401
+    assert res['message'] == 'User not recognized'
 
 
 def test_login_wrong_user(client):
     user = build_user()
     create_user(client, user)
 
-    res = client.post(path='/v1/sesiones', data=json.dumps({
-        'email': 'wronguser@test.com',
-        'password': user['password']
-    }), content_type='application/json')
+    user['email'] = 'wronguser@test.com'
+    status, res = login(client, user)
 
-    res_json = res.get_json()
-
-    assert res.status_code == 401
-    assert res_json['message'] == 'User not recognized'
+    assert status == 401
+    assert res['message'] == 'User not recognized'
 
 
-def test_login_empty_header(client):
-    user = build_user()
-    create_user(client, user)
-
+def test_login_missing_user_and_password(client):
     res = client.post(path='/v1/sesiones', data=json.dumps({}), content_type='application/json')
 
     res_json = res.get_json()

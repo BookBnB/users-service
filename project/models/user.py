@@ -2,6 +2,7 @@ from project.db import db
 from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import generate_password_hash, check_password_hash
 import uuid
+import re
 
 from project.models.role import ROLES
 
@@ -30,6 +31,9 @@ class User(db.Model):
 
         if kwargs.get('role', '') not in ROLES:
             raise ValueError('Invalid user role')
+
+        if not re.match(re.compile(r"\"?([-a-zA-Z0-9.`?{}]+@\w+\.\w+)\"?"), kwargs['email']):
+            raise ValueError('Invalid email')
 
         self.email = kwargs['email']
         self.name = kwargs['name']
@@ -78,6 +82,7 @@ class BookBnBUser(User):
     def password_matches(self, password):
         return check_password_hash(self.password, password)
 
+
 class OAuthUser(User):
     __mapper_args__ = {
         'polymorphic_identity': 'oauth_ser'
@@ -85,6 +90,7 @@ class OAuthUser(User):
 
     def password_matches(self, password):
         raise UserDoesntHavePasswordError('OAuthUser doesn\'t have password')
+
 
 class UserDoesntHavePasswordError(Exception):
     pass

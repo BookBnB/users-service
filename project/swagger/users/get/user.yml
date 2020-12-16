@@ -1,0 +1,20 @@
+Listado de usuarios
+---
+tags:
+  - Usuario
+parameters:
+  - in: path
+    name: id
+    schema:
+      type: string
+      format: uuid
+    required: true
+    description: Id del usuario
+
+responses:
+  200:
+    description: Listado de usuarios
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/UsuarioDTO'

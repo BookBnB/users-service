@@ -49,6 +49,11 @@ def google_users_create(users: UserService, oauth: OAuth):
     except TokenError as e:
         return make_response({'error': 'TokenError', 'message': str(e)}, 400)
 
+@bp.route('/usuarios/<id>', methods=['GET'])
+@swag_from('swagger/users/get/user.yml')
+def user_find(id, users: UserService):
+    user = users.get(id)
+    return jsonify(user.serialize())
 
 @bp.route('/usuarios', methods=['GET'])
 @swag_from('swagger/users/get/users.yml')

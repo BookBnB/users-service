@@ -8,4 +8,6 @@ responses:
     content:
       application/json:
         schema:
-          $ref: '#/components/schemas/UsuarioDTO'
+          type: array
+          items:
+            $ref: '#/components/schemas/UsuarioDTO'

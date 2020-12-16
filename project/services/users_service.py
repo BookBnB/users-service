@@ -24,5 +24,9 @@ class UserService:
     def get_all(self):
         return User.query.all()
 
+    def get(self, user_id):
+        return User.query.get(user_id)
+
     def find_by_email(self, email):
         return User.query.filter_by(email=email).first()
+

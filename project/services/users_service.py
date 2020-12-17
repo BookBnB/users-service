@@ -30,3 +30,5 @@ class UserService:
     def find_by_email(self, email):
         return User.query.filter_by(email=email).first()
 
+    def get_many(self, ids):
+        return User.query.filter(User.id.in_(ids)).all()

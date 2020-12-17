@@ -55,6 +55,12 @@ def user_find(id, users: UserService):
     user = users.get(id)
     return jsonify(user.serialize())
 
+@bp.route('/usuarios/bulk', methods=['GET'])
+@swag_from('swagger/users/get/bulk_users.yml')
+def users_find(users: UserService):
+    ids = request.args.getlist('id')
+    return jsonify([user.serialize() for user in users.get_many(ids)])
+
 @bp.route('/usuarios', methods=['GET'])
 @swag_from('swagger/users/get/users.yml')
 def users_list(users: UserService):

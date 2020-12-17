@@ -20,7 +20,7 @@ def users_create(users: UserService):
 
     try:
         user = users.create_user(body)
-        return jsonify(user.serialize())
+        return jsonify(user.serialize()), 201
     except ValueError as ex:
         return make_response({'message': str(ex)}, 400)
 
@@ -45,9 +45,10 @@ def google_users_create(users: UserService, oauth: OAuth):
             'phone': body.get('phone', None),
             'city': body.get('city', None)
         })
-        return jsonify(user.serialize())
+        return jsonify(user.serialize()), 201
     except TokenError as e:
         return make_response({'error': 'TokenError', 'message': str(e)}, 400)
+
 
 @bp.route('/usuarios/<id>', methods=['GET'])
 @swag_from('swagger/users/get/user.yml')
@@ -55,11 +56,13 @@ def user_find(id, users: UserService):
     user = users.get(id)
     return jsonify(user.serialize())
 
+
 @bp.route('/usuarios/bulk', methods=['GET'])
 @swag_from('swagger/users/get/bulk_users.yml')
 def users_find(users: UserService):
     ids = request.args.getlist('id')
     return jsonify([user.serialize() for user in users.get_many(ids)])
+
 
 @bp.route('/usuarios', methods=['GET'])
 @swag_from('swagger/users/get/users.yml')

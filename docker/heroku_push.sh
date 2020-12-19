@@ -1,7 +1,7 @@
 #!/bin/bash
 ./docker/build_production_image.sh
-docker tag users-service:latest registry.heroku.com/users-service-$TRAVIS_BRANCH/web
+docker tag users-service:latest registry.heroku.com/users-service-$BRANCH/web
 echo "$HEROKU_API_KEY" | docker login --username=_ --password-stdin registry.heroku.com
-docker push registry.heroku.com/users-service-$TRAVIS_BRANCH/web
+docker push registry.heroku.com/users-service-$BRANCH/web
 curl https://cli-assets.heroku.com/install.sh | sh  #install heroku
-heroku container:release web -a users-service-$TRAVIS_BRANCH
+heroku container:release web -a users-service-$BRANCH

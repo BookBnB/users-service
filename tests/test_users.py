@@ -29,7 +29,7 @@ def login(client, user):
 
 
 def validate_create_user_response(status, res, role):
-    assert status == 200
+    assert status == 201
     assert res['id']
     assert res['email'] == 'test@test.com'
     assert res['name'] == 'name'
@@ -180,7 +180,7 @@ def test_create_user_missing_optional_fields(client):
     del user['city']
     status, res = create_user(client, user)
 
-    assert status == 200
+    assert status == 201
     assert res['id']
     assert res['name'] == user['name']
     assert res['surname'] == user['surname']

@@ -63,7 +63,7 @@ def test_create_user_missing_token(client):
 def test_create_user_valid(client):
     status, res = create_user(client, VALID_TOKEN)
 
-    assert status == 200
+    assert status == 201
     assert res['id']
     assert res['email'] == 'sblazquez@fi.uba.ar'
     assert res['name'] == 'Sebastián Alejandro'

@@ -17,9 +17,8 @@ jobs:
         run: docker-compose ps -a
       - name: Run test suite
         run: |
-          sqlite3 .coverage "VACUUM;"
           docker-compose exec -T users_app pip install -r requirements.txt --user
-          docker-compose exec -T users_app coverage run -a -m pytest tests
+          docker-compose exec -T users_app coverage run -a -m pytest
       - name: Send coverage report
         run: bash <(curl -s https://codecov.io/bash)
 

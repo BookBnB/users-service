@@ -1,3 +1,4 @@
 [run]
 source=project
 branch=True
+data_file=.coverage2

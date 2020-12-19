@@ -2,7 +2,7 @@ name: build
 on: [ push, pull_request ]
 jobs:
   test:
-    runs-on: [self-hosted, linux]
+    runs-on: ubuntu-20.04
     steps:
       - name: Cache docker layers
         uses: satackey/action-docker-layer-caching@v0.0.11
@@ -18,7 +18,7 @@ jobs:
       - name: Run test suite
         run: |
           docker-compose exec -T users_app pip install -r requirements.txt --user
-          docker-compose exec -T users_app coverage run -m pytest
+          docker-compose exec -T users_app coverage run -m pytest tests
       - name: Send coverage report
         run: bash <(curl -s https://codecov.io/bash)
 

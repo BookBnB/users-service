@@ -1,4 +1,3 @@
 [run]
 source=project
 branch=True
-data_file=coverage.sqlite

@@ -7,7 +7,6 @@ instance/
 
 .pytest_cache/
 .coverage
-.coverage2
 htmlcov/
 
 dist/

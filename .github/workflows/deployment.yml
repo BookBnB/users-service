@@ -2,7 +2,7 @@ name: build
 on: [ push, pull_request ]
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Cache docker layers
         uses: satackey/action-docker-layer-caching@v0.0.11

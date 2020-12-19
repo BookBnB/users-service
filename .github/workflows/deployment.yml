@@ -4,27 +4,17 @@ jobs:
   test:
     runs-on: ubuntu-20.04
     steps:
-      - name: Cache docker layers
-        uses: satackey/action-docker-layer-caching@v0.0.11
-        continue-on-error: true # Ignore the failure of a step and avoid terminating the job.
       - name: Checkout code
         uses: actions/checkout@v1
-      - name: Build docker services
-        run: docker-compose build
-      - name: Start services
-        run: docker-compose up -d
-      - name: Check running containers
-        run: docker-compose ps -a
       - name: Run test suite
         run: |
-          useradd -ms /bin/bash user
-          docker-compose exec -T users_app pip install -r requirements.txt --user
-          docker-compose exec -T users_app coverage run -a -m pytest
+          pip install -r requirements.txt
+          coverage run -a -m pytest
       - name: Send coverage report
         run: bash <(curl -s https://codecov.io/bash)
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: test
     if: contains('
       refs/heads/master

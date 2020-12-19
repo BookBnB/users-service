@@ -10,5 +10,6 @@ RUN apt-get update && \
 # Switch to non-root user
 RUN useradd -ms /bin/bash user
 USER user
-RUN echo 'PATH=$PATH:$HOME/.local/bin' >> $HOME/.bashrc && \
-    pip3 install pipenv --user
+RUN pip3 install pipenv --user
+ENV PATH="$PATH:/home/user/.local/bin"
+CMD bash -c "source $HOME/.bashrc && ./run_dev.sh"

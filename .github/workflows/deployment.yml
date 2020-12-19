@@ -18,7 +18,7 @@ jobs:
       - name: Run test suite
         run: |
           docker-compose exec -T users_app pip install -r requirements.txt --user
-          docker-compose exec -T users_app python -m pytest tests
+          docker-compose exec -T users_app coverage run -m pytest
       - name: Send coverage report
         run: bash <(curl -s https://codecov.io/bash)
 

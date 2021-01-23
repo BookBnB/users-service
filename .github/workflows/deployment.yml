@@ -13,7 +13,8 @@ jobs:
           coverage run -a -m pytest
       - name: Send coverage report
         run: |
-          pip install -r requirements.txt
+          export PATH="$PATH:/home/runner/.local/bin"
+          pip install coverage --user
           ls -la
           bash <(curl -s https://codecov.io/bash)
 

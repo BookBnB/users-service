@@ -1,6 +1,8 @@
 import datetime
 
 from flasgger import swag_from
+from sqlalchemy import exc
+import psycopg2
 from flask import (Blueprint, current_app, jsonify, make_response,
                    request)
 
@@ -53,7 +55,13 @@ def google_users_create(users: UserService, oauth: OAuth):
 @bp.route('/usuarios/<id>', methods=['GET'])
 @swag_from('swagger/users/get/user.yml')
 def user_find(id, users: UserService):
-    user = users.get(id)
+    try:
+        user = users.get(id)
+    except exc.DataError:
+        return make_response({'message': 'Invalid id {}'.format(id)}, 400)
+
+    if not user:
+        return make_response({'message': 'User with id {} does not exist'.format(id)}, 404)
     return jsonify(user.serialize())
 
 
@@ -61,7 +69,15 @@ def user_find(id, users: UserService):
 @swag_from('swagger/users/get/bulk_users.yml')
 def users_find(users: UserService):
     ids = request.args.getlist('id')
-    return jsonify([user.serialize() for user in users.get_many(ids)])
+    try:
+        users = users.get_many(ids)
+    except exc.DataError:
+        return make_response({'message': 'Invalid parameters'}, 400)
+
+    if len(users) != len(ids):
+        return make_response({'message': 'One or more users do not exist'.format(id)}, 404)
+
+    return jsonify([user.serialize() for user in users])
 
 
 @bp.route('/usuarios', methods=['GET'])

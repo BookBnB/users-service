@@ -1,7 +1,7 @@
 version: '3.7'
 
 services:
-  users_app:
+  users-app:
     build:
       dockerfile: docker/Dockerfile.development
       context: .

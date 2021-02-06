@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookbnb-users
+  labels:
+    app: bookbnb-users
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bookbnb-users
+  template:
+    metadata:
+      labels:
+        app: bookbnb-users
+    spec:
+      containers:
+      - name: users
+        image: ghcr.io/bookbnb/users-service:latest
+        ports:
+        - name: users-port
+          containerPort: 80
+          protocol: TCP
+        envFrom:
+          - secretRef:
+              name: users-secret
+          - configMapRef:
+              name: users-config

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bookbnb-users-service
+  labels:
+    run: bookbnb-users-service
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: users-port
+  selector:
+    app: bookbnb-users

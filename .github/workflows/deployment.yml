@@ -1,5 +1,11 @@
 name: build
 on: [ push, pull_request ]
+env:
+  REGISTRY_URL: ghcr.io
+  REGISTRY_USERNAME: ${{ github.actor }}
+  REGISTRY_PASSWORD: ${{ secrets.CONTAINER_REGISTRY_TOKEN }}
+  IMAGE_NAME: ghcr.io/bookbnb/users-service
+  IMAGE_VERSION: ${{ github.sha }}
 jobs:
   test:
     runs-on: ubuntu-20.04
@@ -17,9 +23,25 @@ jobs:
           pip install coverage --user
           bash <(curl -s https://codecov.io/bash)
 
-  deploy:
+  package:
     runs-on: ubuntu-20.04
-    needs: test
+    needs: build
+    if: contains('
+      refs/heads/master
+      refs/heads/develop
+      ', github.ref)
+    steps:
+      - name: Cache docker layers
+        uses: satackey/action-docker-layer-caching@v0.0.11
+        continue-on-error: true # Ignore the failure of a step and avoid terminating the job.
+      - name: Checkout code
+        uses: actions/checkout@v1
+      - name: Build image
+        run: docker/push_image.sh
+
+  deploy-in-heroku:
+    runs-on: ubuntu-20.04
+    needs: package
     if: contains('
       refs/heads/master
       refs/heads/develop
@@ -32,4 +54,24 @@ jobs:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
           export BRANCH=${GITHUB_REF##*/}
-          docker/heroku_push.sh
+          heroku/deploy.sh
+
+  deploy-in-kubernetes:
+    runs-on: ubuntu-20.04
+    container: bitnami/kubectl
+    needs: package
+    if: contains('
+      refs/heads/master
+      refs/heads/develop
+      ', github.ref)
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v1
+      - name: Deploy app
+        env:
+          KUBECONFIG_CONTENT: ${{ secrets.KUBECONFIG_CONTENT }}
+          KUBECONFIG: /tmp/config
+          KUBE_NAMESPACE: seblaz
+        run: |
+          echo ${KUBECONFIG_CONTENT} | base64 --decode > ${KUBECONFIG}
+          kubernetes/deploy.sh

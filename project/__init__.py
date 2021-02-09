@@ -50,7 +50,7 @@ def create_app(test_config=None):
 
     configure_dependencies(app)
 
-    metrics = PrometheusMetrics(app=app, path='/v1/metricas')
+    metrics = PrometheusMetrics(app=app, path='/metrics')
 
     print(app.url_map)
 

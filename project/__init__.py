@@ -7,6 +7,7 @@ from project.infra.tokenizer import Tokenizer
 from project.services.users_service import UserService
 from project.v1 import bp as bp_v1
 from flasgger import Swagger
+from prometheus_flask_exporter import PrometheusMetrics
 import yaml
 import os
 
@@ -48,6 +49,10 @@ def create_app(test_config=None):
     configure_swagger(app)
 
     configure_dependencies(app)
+
+    metrics = PrometheusMetrics(app=app, path='/v1/metricas')
+
+    print(app.url_map)
 
     return app
 

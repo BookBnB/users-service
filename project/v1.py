@@ -177,7 +177,7 @@ def request_is_authenticated():
 
 def request_is_from_role(role, tokenizer):
     auth_header = request.headers.get('Authorization')
-    decoded_token = tokenizer.decode(auth_header.encode())
+    decoded_token = tokenizer.decode(auth_header.encode(), verify_signature=False)
     return decoded_token['role'] == role
 
 

@@ -52,8 +52,6 @@ def create_app(test_config=None):
 
     metrics = PrometheusMetrics(app=app, path='/metrics')
 
-    print(app.url_map)
-
     return app
 
 

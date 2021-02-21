@@ -64,6 +64,24 @@ def user_find(id, users: UserService):
         return make_response({'message': 'User with id {} does not exist'.format(id)}, 404)
     return jsonify(user.serialize())
 
+@bp.route('/usuarios/<id>/bloqueo', methods=['PUT'])
+@swag_from('swagger/users/put/users-block.yml')
+def block_user(id, users: UserService):
+    try:
+        user = users.get(id)
+    except exc.DataError:
+        return make_response({'message': 'Invalid id {}'.format(id)}, 400)
+
+    if not user:
+        return make_response({'message': 'User with id {} does not exist'.format(id)}, 404)
+
+    body = request.get_json()
+
+    user.blocked = bool(body['blocked'])
+
+    users.save(user)
+
+    return jsonify({})
 
 @bp.route('/usuarios/bulk', methods=['GET'])
 @swag_from('swagger/users/get/bulk_users.yml')
@@ -103,6 +121,8 @@ def create_session(users: UserService, tokenizer: Tokenizer):
     try:
         if not user or not user.password_matches(password):
             return make_response({'message': 'User not recognized'}, 401)
+        if user.blocked:
+            return make_response({'message': 'User is blocked'}, 403)
     except UserDoesntHavePasswordError:
         return make_response({'message': 'User doesn\'t have password'}, 401)
 
@@ -128,6 +148,9 @@ def create_google_session(users: UserService, tokenizer: Tokenizer, oauth: OAuth
 
     if not user:
         return make_response({'message': 'User not recognized'}, 401)
+
+    if user.blocked:
+        return make_response({'message': 'User is blocked'}, 403)
 
     return jsonify({'token': _generate_session_token(tokenizer, user)})
 

@@ -1,0 +1,31 @@
+Bloqueo de Usuario
+---
+tags:
+  - Usuario
+parameters:
+  - in: path
+    name: id
+    schema:
+      type: string
+      format: uuid
+    required: true
+    description: Id del usuario
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+          $ref: '#/components/schemas/BloquearUsuarioDTO'
+
+components:
+  schemas:
+    BloquearUsuarioDTO:
+      type: object
+      properties:
+        blocked:
+          type: boolean
+responses:
+  200:
+    description: Bloqueo del usuario modificado
+security:
+ - token: []

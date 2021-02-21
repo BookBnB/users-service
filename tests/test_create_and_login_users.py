@@ -37,6 +37,23 @@ def validate_create_user_response(status, res, role):
     assert res['phone'] == '0123456789'
     assert res['city'] == 'test city, test state'
     assert res['role'] == role
+    assert res['blocked'] == False
+
+
+def validate_login_response(status, res, user):
+    base64_data = res['token'].split('.')[1]
+
+    if len(base64_data) % 2 != 0:
+        base64_data += '='
+
+    decoded_data = b64decode(base64_data.encode()).decode()
+    data = json.loads(decoded_data)
+
+    assert status == 200
+    assert data['id']
+    assert data['email'] == user['email']
+    assert data['role'] == user['role']
+    assert data['exp']
 
 
 def test_create_user_host_role(client):
@@ -209,25 +226,13 @@ def test_create_and_list_users(client):
 
     assert len(users_array) == 2
 
-
 def test_login(client):
     user = build_user(role='guest')
     create_user(client, user)
 
     status, res = login(client, user)
-    base64_data = res['token'].split('.')[1]
 
-    if len(base64_data) % 2 != 0:
-        base64_data += '='
-
-    decoded_data = b64decode(base64_data.encode()).decode()
-    data = json.loads(decoded_data)
-
-    assert status == 200
-    assert data['id']
-    assert data['email'] == user['email']
-    assert data['role'] == user['role']
-    assert data['exp']
+    validate_login_response(status, res, user)
 
 
 def test_login_wrong_password(client):

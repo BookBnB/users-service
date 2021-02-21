@@ -18,6 +18,7 @@ class User(db.Model):
     phone = db.Column(db.String(128))
     city = db.Column(db.String(128))
     type = db.Column(db.String(50), nullable=False)
+    blocked = db.Column(db.Boolean(), default=False, nullable=False)
 
     __mapper_args__ = {
         'polymorphic_on': type,
@@ -54,7 +55,8 @@ class User(db.Model):
             "surname": self.surname,
             "role": self.role,
             "phone": self.phone,
-            "city": self.city
+            "city": self.city,
+            "blocked": self.blocked
         }
 
     def password_matches(self, password):

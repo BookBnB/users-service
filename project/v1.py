@@ -11,6 +11,7 @@ from project.infra.tokenizer import Tokenizer
 from project.models.role import ROLES
 from project.models.user import UserDoesntHavePasswordError
 from project.services.users_service import UserService
+from project.services.servers_service import ServerService
 
 bp = Blueprint('v1', __name__, url_prefix='/v1')
 
@@ -146,3 +147,22 @@ def _generate_session_token(tokenizer, user):
 @swag_from('swagger/users/get/roles.yml')
 def get_roles():
     return jsonify({'roles': ROLES})
+
+
+@bp.route('/servidores', methods=['POST'])
+@swag_from('swagger/servers/post/servers.yml')
+def servers_create(servers: ServerService):
+    body = request.get_json()
+
+    try:
+        server = servers.create_server(body)
+        return jsonify(server.serialize()), 201
+    except ValueError as ex:
+        return make_response({'message': str(ex)}, 400)
+
+
+@bp.route('/servidores', methods=['GET'])
+@swag_from('swagger/servers/get/servers.yml')
+def servers_list(servers: ServerService):
+    servers = servers.get_all()
+    return jsonify([u.serialize() for u in servers])

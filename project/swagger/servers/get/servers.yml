@@ -1,0 +1,13 @@
+Listado de usuarios
+---
+tags:
+  - Servidor
+responses:
+  200:
+    description: Listado de servidores
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServidorDTO'

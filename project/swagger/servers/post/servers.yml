@@ -1,0 +1,36 @@
+Creación de Usuario
+---
+tags:
+  - Servidor
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+          $ref: '#/components/schemas/CrearServidorDTO'
+
+components:
+  schemas:
+    CrearServidorDTO:
+      type: object
+      properties:
+        nombre:
+          type: string
+    ServidorDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        nombre:
+          type: string
+        token:
+          type: string
+responses:
+  200:
+    description: Datos del servidor creado
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ServidorDTO'
+security:
+ - token: []

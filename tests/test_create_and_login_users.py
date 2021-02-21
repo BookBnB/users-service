@@ -226,6 +226,7 @@ def test_create_and_list_users(client):
 
     assert len(users_array) == 2
 
+
 def test_login(client):
     user = build_user(role='guest')
     create_user(client, user)

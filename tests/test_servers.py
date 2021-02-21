@@ -34,6 +34,15 @@ def test_create_server(client):
     validate_create_server_response(status, res, 'un nombre')
 
 
+def test_create_server_without_name(client):
+    user = {}
+
+    status, res = create_server(client, user)
+
+    assert status == 400
+    assert res['message'] == 'Missing server nombre'
+
+
 def test_create_and_list_servers(client):
     server1 = build_server('un nombre')
     server2 = build_server('otro nombre')

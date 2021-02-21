@@ -1,8 +1,8 @@
 """Servers
 
-Revision ID: fc8466fd1da6
-Revises: 16c43495b878
-Create Date: 2021-02-21 17:22:33.262911
+Revision ID: 113f1412c360
+Revises: e887ca8f1c99
+Create Date: 2021-02-21 17:42:32.462808
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = 'fc8466fd1da6'
-down_revision = '16c43495b878'
+revision = '113f1412c360'
+down_revision = 'e887ca8f1c99'
 branch_labels = None
 depends_on = None
 

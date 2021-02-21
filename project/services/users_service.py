@@ -32,3 +32,6 @@ class UserService:
 
     def get_many(self, ids):
         return User.query.filter(User.id.in_(ids)).all()
+
+    def save(self, user):
+        db.session.commit()

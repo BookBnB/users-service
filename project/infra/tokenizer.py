@@ -8,5 +8,5 @@ class Tokenizer:
     def encode(self, data):
         return jwt.encode(data, self.secret_key)
 
-    def decode(self, token):
-        return jwt.decode(token, self.secret_key)
+    def decode(self, token, verify_signature=True):
+        return jwt.decode(token, self.secret_key, {'verify_signature':verify_signature})

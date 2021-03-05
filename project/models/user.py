@@ -78,11 +78,15 @@ class BookBnBUser(User):
 
         super().__init__(**kwargs)
 
-        hashed_password = generate_password_hash(kwargs['password'], method='sha256')
-        self.password = hashed_password
+        self.change_password(kwargs['password'])
 
     def password_matches(self, password):
         return check_password_hash(self.password, password)
+
+    def change_password(self, new_password):
+        hashed_password = generate_password_hash(new_password, method='sha256')
+        self.password = hashed_password
+
 
 
 class OAuthUser(User):

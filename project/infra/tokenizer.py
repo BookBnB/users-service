@@ -1,5 +1,8 @@
 import jwt
 
+ExpiredSignatureError = jwt.ExpiredSignatureError
+InvalidSignatureError = jwt.InvalidSignatureError
+
 class Tokenizer:
 
     def __init__(self, secret_key):

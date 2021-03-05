@@ -12,7 +12,17 @@ class Config(object):
     GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
 
     # expresado en segundos, default 24hs
-    SESSION_TOKEN_DURATION = int(os.getenv('SESSION_TOKEN_DURATION') or "86400")
+    SESSION_TOKEN_DURATION = int(os.getenv('SESSION_TOKEN_DURATION', '86400'))
+    CHANGE_PASSWORD_TOKEN_DURATION = int(os.getenv('CHANGE_PASSWORD_TOKEN_DURATION', '600'))
+
+    MAIL_SERVER = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
+    MAIL_PORT = os.getenv('MAIL_PORT', 465)
+    MAIL_USE_SSL = os.getenv('MAIL_USE_SSL', True)
+    MAIL_USERNAME = os.getenv('MAIL_USERNAME')
+    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+    MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER')
+
+    BACKOFFICE_URL = os.getenv('BACKOFFICE_URL')
 
     SWAGGER = {
         "title": "BookBnB: Usuarios",

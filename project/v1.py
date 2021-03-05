@@ -1,17 +1,17 @@
 import datetime
 
-from flasgger import swag_from
-from sqlalchemy import exc
 import psycopg2
-from flask import (Blueprint, current_app, jsonify, make_response,
-                   request)
+from flasgger import swag_from
+from flask import Blueprint, current_app, jsonify, make_response, request
+from sqlalchemy import exc
 
 from project.infra.google_oauth import OAuth, TokenError
-from project.infra.tokenizer import Tokenizer
+from project.infra.tokenizer import Tokenizer, ExpiredSignatureError, InvalidSignatureError
+from project.infra.mail_service import MailService
 from project.models.role import ROLES
 from project.models.user import UserDoesntHavePasswordError
-from project.services.users_service import UserService
 from project.services.servers_service import ServerService
+from project.services.users_service import UserService
 
 bp = Blueprint('v1', __name__, url_prefix='/v1')
 
@@ -205,3 +205,70 @@ def servers_create(servers: ServerService):
 def servers_list(servers: ServerService):
     servers = servers.get_all()
     return jsonify([u.serialize() for u in servers])
+
+
+
+@bp.route('/usuarios/<email>/recuperacion', methods=['PUT'])
+def cambiarContrasena(email, users: UserService, tokenizer: Tokenizer, mailService: MailService):
+    try:
+        user = users.find_by_email(email)
+
+        if not user:
+            return make_response({'message': 'User does not exist'}, 404)
+
+        duration = datetime.timedelta(seconds=current_app.config['CHANGE_PASSWORD_TOKEN_DURATION'])
+        token = tokenizer.encode({
+            'id': str(user.id),
+            'email': user.email,
+            'exp': datetime.datetime.utcnow() + duration,
+            'type': 'change_password'
+        })
+
+        content = 'Ingrese al siguiente enlace para cambiar su contraseña: %s/cambiarContraseña?jwt=%s' % (
+            current_app.config['BACKOFFICE_URL'],
+            token
+        )
+
+        mailService.send_mail(
+            'Cambio de contraseña',
+            user.email,
+            current_app.config['MAIL_DEFAULT_SENDER'],
+            content
+        )
+
+        return make_response({'message': 'ok'}, 200)
+    except Exception as e:
+        return make_response({'message': str(e)}, 500)
+
+
+@bp.route('/usuarios/<email>/contrasena', methods=['PUT'])
+def confirmarCambioContrasena(email, users: UserService, tokenizer: Tokenizer):
+    try:
+        auth_header = request.headers.get('Authorization')
+
+        if not auth_header:
+            return make_response({'message': 'User not recognized'}, 401)
+
+        decoded_token = tokenizer.decode(auth_header.encode())
+
+        if decoded_token['type'] != 'change_password':
+            return make_response({'message': 'Invalid token type'}, 403)
+
+        if decoded_token['email'] != email:
+            return make_response({'message': 'Token email does not match'}, 403)
+
+        body = request.get_json()
+
+        user = users.find_by_email(email)
+
+        user.change_password(body['password'])
+
+        users.save(user)
+
+        return make_response({'message': 'ok'}, 200)
+    except ExpiredSignatureError as e:
+        return make_response({'message': 'Token expired'}, 400)
+    except InvalidSignatureError as e:
+        return make_response({'message': 'Invalid token signature'}, 400)
+    except Exception as e:
+        return make_response({'message': str(e)}, 500)

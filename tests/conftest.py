@@ -1,7 +1,7 @@
 import pytest
-
+from flask_migrate import downgrade, upgrade
 from project import create_app
-from flask_migrate import upgrade, downgrade
+from project.infra.tokenizer import Tokenizer
 from testing.postgresql import PostgresqlFactory
 
 Postgresql = PostgresqlFactory(cache_initialized_db=True)
@@ -27,6 +27,10 @@ def app():
 def client(app):
     """A test client for the app."""
     return app.test_client()
+
+@pytest.fixture
+def tokenizer(app):
+    return Tokenizer(app.config['SECRET_KEY'])
 
 def pytest_sessionfinish(session, exitstatus):
     Postgresql.clear_cache()

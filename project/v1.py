@@ -223,7 +223,7 @@ def cambiarContrasena(email, users: UserService, tokenizer: Tokenizer, mailServi
             'email': user.email,
             'exp': datetime.datetime.utcnow() + duration,
             'type': 'change_password'
-        })
+        }).decode('UTF-8')
 
         content = 'Ingrese al siguiente enlace para cambiar su contraseña: %s/cambiarContraseña?jwt=%s' % (
             current_app.config['BACKOFFICE_URL'],

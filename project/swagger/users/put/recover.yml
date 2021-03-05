@@ -1,0 +1,18 @@
+Recuperación de contraseña de Usuario
+---
+tags:
+  - Usuario
+parameters:
+  - in: path
+    name: email
+    schema:
+      type: string
+    required: true
+    description: Email del usuario
+
+responses:
+  200:
+    description: Proceso de recuperación iniciado
+
+security:
+ - token: []

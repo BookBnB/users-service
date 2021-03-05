@@ -209,6 +209,7 @@ def servers_list(servers: ServerService):
 
 
 @bp.route('/usuarios/<email>/recuperacion', methods=['PUT'])
+@swag_from('swagger/users/put/recover.yml')
 def cambiarContrasena(email, users: UserService, tokenizer: Tokenizer, mailService: MailService):
     try:
         user = users.find_by_email(email)
@@ -242,6 +243,7 @@ def cambiarContrasena(email, users: UserService, tokenizer: Tokenizer, mailServi
 
 
 @bp.route('/usuarios/<email>/contrasena', methods=['PUT'])
+@swag_from('swagger/users/put/password.yml')
 def confirmarCambioContrasena(email, users: UserService, tokenizer: Tokenizer):
     try:
         auth_header = request.headers.get('Authorization')

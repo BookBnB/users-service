@@ -1,15 +1,19 @@
+import os
+from logging.config import dictConfig
+from time import strftime
+
+import yaml
+from flasgger import Swagger
 from flask import Flask
-from flask_migrate import Migrate
 from flask_injector import FlaskInjector
+from flask_migrate import Migrate
+from prometheus_flask_exporter import PrometheusMetrics
+
 from project.db import db
 from project.infra.google_oauth import OAuth
 from project.infra.tokenizer import Tokenizer
 from project.services.users_service import UserService
 from project.v1 import bp as bp_v1
-from flasgger import Swagger
-from prometheus_flask_exporter import PrometheusMetrics
-import yaml
-import os
 
 
 def get_schemas():
@@ -33,6 +37,24 @@ def get_schemas():
     return schemas
 
 
+def config_logging(app):
+    dictConfig({
+        'version': 1,
+        'formatters': {'default': {
+            'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+        }},
+        'handlers': {'wsgi': {
+            'class': 'logging.StreamHandler',
+            'stream': 'ext://flask.logging.wsgi_errors_stream',
+            'formatter': 'default'
+        }},
+        'root': {
+            'level': 'INFO',
+            'handlers': ['wsgi']
+        }
+    })
+
+
 def create_app(test_config=None):
     app = Flask(__name__)
     app.config.from_object("project.config.Config")
@@ -51,6 +73,8 @@ def create_app(test_config=None):
     configure_dependencies(app)
 
     metrics = PrometheusMetrics(app=app, path='/metrics')
+
+    config_logging(app)
 
     return app
 

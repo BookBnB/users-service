@@ -4,6 +4,7 @@ import psycopg2
 from flasgger import swag_from
 from flask import Blueprint, current_app, jsonify, make_response, request
 from sqlalchemy import exc
+from time import strftime
 
 from project.infra.google_oauth import OAuth, TokenError
 from project.infra.tokenizer import Tokenizer, ExpiredSignatureError, InvalidSignatureError
@@ -14,6 +15,21 @@ from project.services.servers_service import ServerService
 from project.services.users_service import UserService
 
 bp = Blueprint('v1', __name__, url_prefix='/v1')
+
+
+@bp.after_request
+def after_request(response):
+    timestamp = strftime('[%Y-%b-%d %H:%M]')
+    current_app.logger.info('%s %s %s %s', request.method, request.scheme, request.full_path, response.status)
+    return response
+
+
+@bp.errorhandler(Exception)
+def exceptions(e):
+    tb = traceback.format_exc()
+    timestamp = strftime('[%Y-%b-%d %H:%M]')
+    current_app.logger.error('%s %s %s 5xx INTERNAL SERVER ERROR\n%s', request.method, request.scheme, request.full_path, tb)
+    return e.status_code
 
 
 @bp.route('/usuarios', methods=['POST'])

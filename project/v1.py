@@ -1,4 +1,5 @@
 import datetime
+import traceback
 
 import psycopg2
 from flasgger import swag_from
@@ -227,35 +228,32 @@ def servers_list(servers: ServerService):
 @bp.route('/usuarios/<email>/recuperacion', methods=['PUT'])
 @swag_from('swagger/users/put/recover.yml')
 def cambiarContrasena(email, users: UserService, tokenizer: Tokenizer, mailService: MailService):
-    try:
-        user = users.find_by_email(email)
+    user = users.find_by_email(email)
 
-        if not user:
-            return make_response({'message': 'User does not exist'}, 404)
+    if not user:
+        return make_response({'message': 'User does not exist'}, 404)
 
-        duration = datetime.timedelta(seconds=current_app.config['CHANGE_PASSWORD_TOKEN_DURATION'])
-        token = tokenizer.encode({
-            'id': str(user.id),
-            'email': user.email,
-            'exp': datetime.datetime.utcnow() + duration,
-            'type': 'change_password'
-        }).decode('UTF-8')
+    duration = datetime.timedelta(seconds=current_app.config['CHANGE_PASSWORD_TOKEN_DURATION'])
+    token = tokenizer.encode({
+        'id': str(user.id),
+        'email': user.email,
+        'exp': datetime.datetime.utcnow() + duration,
+        'type': 'change_password'
+    }).decode('UTF-8')
 
-        content = 'Ingrese al siguiente enlace para cambiar su contraseña: %s/change-password?jwt=%s' % (
-            current_app.config['BACKOFFICE_URL'],
-            token
-        )
+    content = 'Ingrese al siguiente enlace para cambiar su contraseña: %s/change-password?jwt=%s' % (
+        current_app.config['BACKOFFICE_URL'],
+        token
+    )
 
-        mailService.send_mail(
-            'Cambio de contraseña',
-            user.email,
-            current_app.config['MAIL_DEFAULT_SENDER'],
-            content
-        )
+    mailService.send_mail(
+        'Cambio de contraseña',
+        user.email,
+        current_app.config['MAIL_DEFAULT_SENDER'],
+        content
+    )
 
-        return make_response({'message': 'ok'}, 200)
-    except Exception as e:
-        return make_response({'message': str(e)}, 500)
+    return make_response({'message': 'ok'}, 200)
 
 
 @bp.route('/usuarios/<email>/contrasena', methods=['PUT'])
@@ -288,5 +286,3 @@ def confirmarCambioContrasena(email, users: UserService, tokenizer: Tokenizer):
         return make_response({'message': 'Token expired'}, 400)
     except InvalidSignatureError as e:
         return make_response({'message': 'Invalid token signature'}, 400)
-    except Exception as e:
-        return make_response({'message': str(e)}, 500)

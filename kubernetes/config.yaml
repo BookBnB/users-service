@@ -4,3 +4,9 @@ metadata:
   name: users-config
 data:
   PORT: "80"
+  MAIL_PORT: "465"
+  MAIL_USE_SSL: "true"
+  MAIL_SERVER: "smtp.gmail.com"
+  MAIL_USERNAME: "sender@example.com"
+  MAIL_DEFAULT_SENDER: "sender@example.com"
+  BACKOFFICE_URL: "backoffice"

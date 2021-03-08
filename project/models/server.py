@@ -13,6 +13,7 @@ class Server(db.Model):
     id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, unique=True, primary_key=True)
     nombre = db.Column(db.String(256), nullable=False)
     token = db.Column(db.String(256), nullable=False)
+    blocked = db.Column(db.Boolean(), default=False, nullable=False)
 
     def __init__(self, **kwargs):
         self.assert_key(kwargs, 'nombre')
@@ -20,6 +21,7 @@ class Server(db.Model):
 
         self.nombre = kwargs['nombre']
         self.token = kwargs['token']
+        self.blocked = kwargs.get('blocked', False)
 
     def assert_key(self, values_dict, key):
         if not values_dict.get(key, ''):
@@ -29,5 +31,6 @@ class Server(db.Model):
         return {
             "id": str(self.id),
             "nombre": self.nombre,
-            "token": self.token
+            "token": self.token,
+            "bloqueado": self.blocked
         }

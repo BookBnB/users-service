@@ -1,21 +1,47 @@
 import datetime
 import traceback
+from functools import wraps
+from time import strftime
 
 import psycopg2
 from flasgger import swag_from
 from flask import Blueprint, current_app, jsonify, make_response, request
 from sqlalchemy import exc
-from time import strftime
 
 from project.infra.google_oauth import OAuth, TokenError
-from project.infra.tokenizer import Tokenizer, ExpiredSignatureError, InvalidSignatureError
 from project.infra.mail_service import MailService
+from project.infra.tokenizer import (ExpiredSignatureError,
+                                     InvalidSignatureError, Tokenizer)
 from project.models.role import ROLES
 from project.models.user import UserDoesntHavePasswordError
 from project.services.servers_service import ServerService
 from project.services.users_service import UserService
 
 bp = Blueprint('v1', __name__, url_prefix='/v1')
+
+
+def api_key_required(func):
+    @wraps(func)
+    def decorated(*args, **kwargs):
+        if not current_app.config['REQUIRE_API_KEY']:
+            return func(*args, **kwargs)
+
+        token = request.headers.get('x-api-key')
+
+        if not token:
+            return make_response({ 'message': 'Missing API key'}, 403)
+
+        server = ServerService().find_by_token(token)
+
+        if not server:
+            return make_response({ 'message': 'Invalid API key'}, 403)
+
+        if server.blocked:
+            return make_response({ 'message': 'Blocked API key' }, 403)
+
+        return func(*args, **kwargs)
+
+    return decorated
 
 
 @bp.after_request
@@ -30,11 +56,15 @@ def exceptions(e):
     tb = traceback.format_exc()
     timestamp = strftime('[%Y-%b-%d %H:%M]')
     current_app.logger.error('%s %s %s 5xx INTERNAL SERVER ERROR\n%s', request.method, request.scheme, request.full_path, tb)
-    return e.status_code
+    
+    if hasattr(e, 'status_code'):
+        return e.status_code
+    return 500
 
 
-@bp.route('/usuarios', methods=['POST'])
 @swag_from('swagger/users/post/users.yml')
+@bp.route('/usuarios', methods=['POST'])
+@api_key_required
 def users_create(users: UserService):
     body = request.get_json()
 
@@ -47,6 +77,7 @@ def users_create(users: UserService):
 
 @bp.route('/usuarios/google', methods=['POST'])
 @swag_from('swagger/users/post/google-users.yml')
+@api_key_required
 def google_users_create(users: UserService, oauth: OAuth):
     body = request.get_json()
 
@@ -72,6 +103,7 @@ def google_users_create(users: UserService, oauth: OAuth):
 
 @bp.route('/usuarios/<id>', methods=['GET'])
 @swag_from('swagger/users/get/user.yml')
+@api_key_required
 def user_find(id, users: UserService):
     try:
         user = users.get(id)
@@ -84,6 +116,7 @@ def user_find(id, users: UserService):
 
 @bp.route('/usuarios/<id>/bloqueo', methods=['PUT'])
 @swag_from('swagger/users/put/users-block.yml')
+@api_key_required
 def block_user(id, users: UserService, tokenizer: Tokenizer):
     try:
         user = users.get(id)
@@ -109,6 +142,7 @@ def block_user(id, users: UserService, tokenizer: Tokenizer):
 
 @bp.route('/usuarios/bulk', methods=['GET'])
 @swag_from('swagger/users/get/bulk_users.yml')
+@api_key_required
 def users_find(users: UserService):
     ids = request.args.getlist('id')
     try:
@@ -124,6 +158,7 @@ def users_find(users: UserService):
 
 @bp.route('/usuarios', methods=['GET'])
 @swag_from('swagger/users/get/users.yml')
+@api_key_required
 def users_list(users: UserService):
     users = users.get_all()
     return jsonify([u.serialize() for u in users])
@@ -131,6 +166,7 @@ def users_list(users: UserService):
 
 @bp.route('/sesiones', methods=['POST'])
 @swag_from('swagger/users/post/sessions.yml')
+@api_key_required
 def create_session(users: UserService, tokenizer: Tokenizer):
     data = request.get_json()
 
@@ -155,6 +191,7 @@ def create_session(users: UserService, tokenizer: Tokenizer):
 
 @bp.route('/sesiones/google', methods=['POST'])
 @swag_from('swagger/users/post/google-sessions.yml')
+@api_key_required
 def create_google_session(users: UserService, tokenizer: Tokenizer, oauth: OAuth):
     body = request.get_json()
 
@@ -201,6 +238,7 @@ def request_is_from_role(role, tokenizer):
 
 @bp.route('/roles')
 @swag_from('swagger/users/get/roles.yml')
+@api_key_required
 def get_roles():
     return jsonify({'roles': ROLES})
 
@@ -224,9 +262,26 @@ def servers_list(servers: ServerService):
     return jsonify([u.serialize() for u in servers])
 
 
+@bp.route('/servidores/<name>/bloqueo', methods=['PUT'])
+# @swag_from('swagger/servers/get/servers.yml')
+def block_server(name, servers: ServerService):
+    server = servers.find_by_name(name)
+
+    if not server:
+        return make_response({'message': 'Server does not exist'}, 404)
+
+    body = request.get_json()
+
+    server.blocked = bool(body['bloqueado'])
+
+    servers.save(server)
+
+    return make_response({ 'message': 'ok' }, 200)
+
 
 @bp.route('/usuarios/<email>/recuperacion', methods=['PUT'])
 @swag_from('swagger/users/put/recover.yml')
+@api_key_required
 def cambiarContrasena(email, users: UserService, tokenizer: Tokenizer, mailService: MailService):
     user = users.find_by_email(email)
 
@@ -258,6 +313,7 @@ def cambiarContrasena(email, users: UserService, tokenizer: Tokenizer, mailServi
 
 @bp.route('/usuarios/<email>/contrasena', methods=['PUT'])
 @swag_from('swagger/users/put/password.yml')
+@api_key_required
 def confirmarCambioContrasena(email, users: UserService, tokenizer: Tokenizer):
     try:
         auth_header = request.headers.get('Authorization')

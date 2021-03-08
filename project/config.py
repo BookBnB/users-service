@@ -40,3 +40,5 @@ class Config(object):
         "uiversion": 3,
         "openapi": "3.0.2",
     }
+
+    REQUIRE_API_KEY = os.getenv('REQUIRE_API_KEY', True)

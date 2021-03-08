@@ -3,7 +3,6 @@ from project.models.user import User, BookBnBUser, OAuthUser
 
 
 class UserService:
-
     def _create_user(self, clazz, values):
         user = clazz(**values)
 

@@ -13,7 +13,8 @@ def app():
     app = create_app({
         "DATABASE_URL": postgresql.url(),
         "SQLALCHEMY_DATABASE_URI": postgresql.url(),
-        "SECRET_KEY": "test_key"
+        "SECRET_KEY": "test_key",
+        "REQUIRE_API_KEY": False
     })
 
     with app.app_context():

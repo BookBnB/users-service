@@ -1,0 +1,40 @@
+Actualización de Usuario
+---
+tags:
+  - Usuario
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+          $ref: '#/components/schemas/ActualizarUsuarioDTO'
+
+parameters:
+  - in: path
+    name: id
+    schema:
+      type: string
+      format: uuid
+    required: true
+    description: Id del usuario
+
+components:
+  schemas:
+    ActualizarUsuarioDTO:
+      type: object
+      properties:
+        name:
+          type: string
+        surname:
+          type: string
+        phone:
+          type: string
+        city:
+          type: string
+
+responses:
+  200:
+    description: Datos del usuario creado
+
+security:
+ - token: []

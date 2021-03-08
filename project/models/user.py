@@ -62,6 +62,10 @@ class User(db.Model):
     def password_matches(self, password):
         raise NotImplementedError()
 
+    def update(self, values):
+        for key,value in values.items():
+            setattr(self, key, value)
+
 
 class BookBnBUser(User):
     password = db.Column(db.String(128))

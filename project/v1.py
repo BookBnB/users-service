@@ -114,6 +114,25 @@ def user_find(id, users: UserService):
         return make_response({'message': 'User with id {} does not exist'.format(id)}, 404)
     return jsonify(user.serialize())
 
+
+@bp.route('/usuarios/<id>', methods=['PUT'])
+@swag_from('swagger/users/put/users.yml')
+def user_update(id, users: UserService):
+    try:
+        user = users.get(id)
+    except exc.DataError:
+        return make_response({'message': 'Invalid id {}'.format(id)}, 400)
+
+    if not user:
+        return make_response({'message': 'User with id {} does not exist'.format(id)}, 404)
+
+    values = request.get_json()
+    user.update(values)
+    users.save(user)
+
+    return make_response({ 'message': 'ok' }, 200)
+
+
 @bp.route('/usuarios/<id>/bloqueo', methods=['PUT'])
 @swag_from('swagger/users/put/users-block.yml')
 @api_key_required

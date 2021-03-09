@@ -1,0 +1,15 @@
+# pull official base image
+FROM python:3.8.6-slim-buster
+
+# install dependencies
+RUN apt-get update && \
+    apt-get -y install postgresql postgresql-client libyaml-dev && \
+    pip uninstall pyyaml && \
+    pip --no-cache-dir install pyyaml
+
+# Switch to non-root user
+RUN useradd -ms /bin/bash user
+USER user
+RUN pip3 install pipenv --user
+ENV PATH="$PATH:/home/user/.local/bin"
+CMD bash -c "source $HOME/.bashrc && ./run_dev.sh"

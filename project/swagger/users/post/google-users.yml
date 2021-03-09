@@ -1,0 +1,34 @@
+Creación de Usuario
+---
+tags:
+  - Usuario
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+          $ref: '#/components/schemas/CrearUsuarioOAuthDTO'
+
+components:
+  schemas:
+    CrearUsuarioOAuthDTO:
+      type: object
+      properties:
+        token:
+          type: string
+        role:
+          type: string
+        phone:
+          type: string
+        city:
+          type: string
+      required:
+        - token
+        - role
+responses:
+  200:
+    description: Datos del usuario creado
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/UsuarioDTO'

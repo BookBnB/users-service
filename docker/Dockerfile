@@ -9,9 +9,16 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV FLASK_APP=/app/project
 ENV HOST=0.0.0.0
+ENV DEBUG_METRICS=false
 
 # copy project
 COPY . /app
+
+# install pyyaml
+RUN apt-get update && \
+    apt-get -y install libyaml-dev && \
+    pip uninstall pyyaml && \
+    pip --no-cache-dir install pyyaml
 
 # install dependencies
 RUN pip install -r requirements.txt && \

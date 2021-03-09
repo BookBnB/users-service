@@ -1,6 +1,6 @@
 # Users Service
 
-[![Build Status](https://travis-ci.com/BookBnB/users-service.svg?branch=master)](https://travis-ci.com/BookBnB/users-service)
+[![build](https://github.com/BookBnB/users-service/workflows/build/badge.svg)](https://github.com/BookBnB/users-service/actions?query=workflow%3Abuild)
 [![codecov](https://codecov.io/gh/BookBnB/users-service/branch/master/graph/badge.svg?token=J7M5ZDX37D)](https://codecov.io/gh/BookBnB/users-service)
 [![Heroku](https://img.shields.io/badge/heroku-master-success.svg?l?style=flat&logo=heroku&logoColor=white&labelColor=494998)](https://users-service-master.herokuapp.com/)
 [![Heroku](https://img.shields.io/badge/heroku-develop-success.svg?l?style=flat&logo=heroku&logoColor=white&labelColor=494998)](https://users-service-develop.herokuapp.com/)

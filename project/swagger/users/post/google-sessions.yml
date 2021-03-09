@@ -7,7 +7,7 @@ requestBody:
   content:
     application/json:
       schema:
-        $ref: '#/components/schemas/CrearSesionDTO'
+        $ref: '#/components/schemas/CrearOAuthSesionDTO'
 
 responses:
   200:
@@ -19,14 +19,7 @@ responses:
 
 components:
   schemas:
-    CrearSesionDTO:
-      type: object
-      properties:
-        email:
-          type: string
-        password:
-          type: string
-    SesionDTO:
+    CrearOAuthSesionDTO:
       type: object
       properties:
         token:

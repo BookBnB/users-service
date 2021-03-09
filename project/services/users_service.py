@@ -1,41 +1,37 @@
 from project.db import db
-from project.models.user import User
-from werkzeug.security import generate_password_hash
-from project.models.role import ROLES
+from project.models.user import User, BookBnBUser, OAuthUser
 
-class UserService():
-    def assert_key(self, values_dict, key):
-        if not values_dict.get(key, ''):
-            raise ValueError('Missing user %s' % key)
 
-    def create_user(self, values_dict):
-        self.assert_key(values_dict, 'name')
-        self.assert_key(values_dict, 'surname')
-        self.assert_key(values_dict, 'email')
-        self.assert_key(values_dict, 'password')
+class UserService:
 
-        if len(values_dict['password']) < 8:
-            raise ValueError('Invalid user password: expected length of 8 characters')
+    def _create_user(self, clazz, values):
+        user = clazz(**values)
 
-        if values_dict.get('role', '') not in ROLES:
-            raise ValueError('Invalid user role')
-
-        if self.find_by_email(values_dict['email']) is not None:
+        if self.find_by_email(user.email) is not None:
             raise ValueError('User already exists')
-
-        hashed_password = generate_password_hash(values_dict['password'], method='sha256')
-
-        user = User(values_dict['email'], values_dict['name'], values_dict['surname'],
-                    hashed_password, values_dict['role'], values_dict.get('phone', ''),
-                    values_dict.get('city', ''))
 
         db.session.add(user)
         db.session.commit()
 
         return user
 
+    def create_user(self, values_dict):
+        return self._create_user(BookBnBUser, values_dict)
+
+    def create_oauth_user(self, values_dict):
+        return self._create_user(OAuthUser, values_dict)
+
     def get_all(self):
         return User.query.all()
 
+    def get(self, user_id):
+        return User.query.get(user_id)
+
     def find_by_email(self, email):
         return User.query.filter_by(email=email).first()
+
+    def get_many(self, ids):
+        return User.query.filter(User.id.in_(ids)).all()
+
+    def save(self, user):
+        db.session.commit()

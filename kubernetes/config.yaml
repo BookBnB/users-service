@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: users-config
+data:
+  PORT: "80"
+  MAIL_PORT: "465"
+  MAIL_USE_SSL: "true"
+  MAIL_SERVER: "smtp.gmail.com"
+  MAIL_USERNAME: "bookbnbnotif@gmail.com"
+  MAIL_DEFAULT_SENDER: "bookbnbnotif@gmail.com"
+  BACKOFFICE_URL: "https://bookbnb-frontend-service-seblaz.cloud.okteto.net"

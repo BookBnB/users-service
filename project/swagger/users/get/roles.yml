@@ -1,14 +1,21 @@
 Listado de roles
-  ---
-  definitions:
-      RolesDTO:
-        type: object
-        properties:
-            roles:
-                type: array
-                items: string
-  responses:
-      200:
-          description: Listado de roles
-          schema:
-              $ref: '#/definitions/RolesDTO'
+---
+tags:
+  - Usuario
+components:
+  schemas:
+    RolesDTO:
+      type: object
+      properties:
+        roles:
+          type: array
+          items:
+            description: rol
+            type: string
+responses:
+  200:
+    description: Listado de roles
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/RolesDTO'

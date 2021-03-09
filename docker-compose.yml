@@ -1,17 +1,22 @@
 version: '3.7'
 
 services:
-  users_app:
-    image: python:3.8.6-slim-buster
+  users-app:
+    build:
+      dockerfile: docker/Dockerfile.development
+      context: .
     volumes:
       - .:/app
+      - python_data:/home/user
     ports:
       - 5000:5000
     env_file: .env
     depends_on:
       - users_db
     working_dir: /app
-    command: ./run_dev.sh
+    networks:
+      - users-net
+      - bookbnb-net
 
   users_db:
     container_name: users_db
@@ -21,7 +26,15 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_users_db=project
+      - POSTGRES_DB=${DB_NAME}
+    networks:
+      - users-net
 
 volumes:
   postgres_data:
+  python_data:
+
+networks:
+  users-net:
+  bookbnb-net:
+    name: bookbnb-net
